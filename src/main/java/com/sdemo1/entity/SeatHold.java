@@ -32,6 +32,7 @@ public class SeatHold {
     private Seat seat;
 
     @Column(name = "hold_expire_at", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime holdExpireAt;
 
     @Column(name = "created_at", insertable = false, updatable = false)

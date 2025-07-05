@@ -20,8 +20,8 @@ public class Concert {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "conid")
-    private BigInteger conid;
+    @Column(name = "id")
+    private BigInteger id;
 
     @Column(name = "title", nullable = false, length = 100)
     private String title;
@@ -30,12 +30,15 @@ public class Concert {
     private String location;
 
     @Column(name = "concert_date", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime concertDate;
 
     @Column(name = "open_time")
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime openTime;
 
     @Column(name = "close_time")
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime closeTime;
 
     @Column(name = "created_at", insertable = false, updatable = false)

@@ -158,7 +158,7 @@ public class AsyncConfig {
     /**
      * 레시피 추천 전용 스레드 풀 (동적 설정)
      */
-    @Bean(name = "recipeRecommendationExecutor")
+    // @Bean(name = "recipeRecommendationExecutor")
     public Executor recipeRecommendationExecutor() {
         // 설정 초기화 (한 번만)
         initializeThreadPoolConfigs();
@@ -189,7 +189,7 @@ public class AsyncConfig {
     /**
      * 알림 전송 전용 스레드 풀 (동적 설정)
      */
-    @Bean(name = "notificationExecutor")
+    // @Bean(name = "notificationExecutor")
     public Executor notificationExecutor() {
         // 설정 초기화 (한 번만)
         initializeThreadPoolConfigs();

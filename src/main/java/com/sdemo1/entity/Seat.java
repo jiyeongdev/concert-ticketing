@@ -36,6 +36,12 @@ public class Seat {
     @Column(name = "seat_number", length = 10)
     private String seatNumber;
 
+    @Column(name = "position_x")
+    private Integer positionX;  // 좌석의 X 좌표
+
+    @Column(name = "position_y")
+    private Integer positionY;  // 좌석의 Y 좌표
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private SeatStatus status = SeatStatus.AVAILABLE;

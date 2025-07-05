@@ -59,7 +59,21 @@ public class AuthController {
             member.setPassword(encodedPassword);
             member.setName(request.getName());
             member.setPhone(request.getPhone());
-            member.setRole(Member.Role.USER);
+            
+            // role 설정 (기본값: USER)
+            Member.Role role = Member.Role.USER;
+            if (request.getRole() != null && !request.getRole().trim().isEmpty()) {
+                try {
+                    role = Member.Role.valueOf(request.getRole().toUpperCase());
+                    log.info("회원가입 role 설정: {}", role);
+                } catch (IllegalArgumentException e) {
+                    log.warn("잘못된 role 값: '{}'. 존재하지 않는 role입니다. 기본값 USER로 설정합니다.", request.getRole());
+                    role = Member.Role.USER;
+                }
+            } else {
+                log.info("role이 지정되지 않아 기본값 USER로 설정합니다.");
+            }
+            member.setRole(role);
 
             Member savedMember = memberRepository.save(member);
             log.info("회원가입 완료: {}", savedMember.getEmail());
@@ -68,6 +82,7 @@ public class AuthController {
             response.put("memberId", savedMember.getMemberId());
             response.put("email", savedMember.getEmail());
             response.put("name", savedMember.getName());
+            response.put("role", savedMember.getRole().name());
 
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("회원가입이 완료되었습니다.", response, HttpStatus.OK));
@@ -110,6 +125,7 @@ public class AuthController {
             response.put("memberId", member.getMemberId());
             response.put("email", member.getEmail());
             response.put("name", member.getName());
+            response.put("role", member.getRole().name());
             response.put("accessToken", accessToken);
 
             log.info("로그인 성공: {}", member.getEmail());

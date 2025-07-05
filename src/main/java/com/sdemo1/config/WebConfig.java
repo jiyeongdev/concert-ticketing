@@ -4,8 +4,13 @@ import com.sdemo1.interceptor.LoggingInterceptor;
 import com.sdemo1.interceptor.AuthenticationInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 // import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -43,5 +48,12 @@ public class WebConfig implements WebMvcConfigurer {
                     "/static/**",       // 정적 리소스 제외
                     "/error"            // 에러 페이지 제외
                 );
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 정적 리소스 핸들러 설정
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/static/");
     }
 } 

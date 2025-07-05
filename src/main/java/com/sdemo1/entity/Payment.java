@@ -41,6 +41,7 @@ public class Payment {
     private String transactionId;
 
     @Column(name = "paid_at")
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime paidAt;
 
     public enum PaymentStatus {

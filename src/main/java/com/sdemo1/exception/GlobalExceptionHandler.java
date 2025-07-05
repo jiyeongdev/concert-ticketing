@@ -12,6 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * 전역 예외 처리 핸들러
@@ -150,6 +152,36 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiResponse<>(e.getMessage(), null, HttpStatus.UNAUTHORIZED));
+    }
+
+    /**
+     * 404 Not Found 처리
+     * 존재하지 않는 URL에 대한 요청
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleNoHandlerFound(NoHandlerFoundException e) {
+        log.warn("존재하지 않는 URL 요청: {} {}", e.getHttpMethod(), e.getRequestURL());
+        
+        String message = String.format("요청하신 URL을 찾을 수 없습니다: %s %s", 
+                e.getHttpMethod(), e.getRequestURL());
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(message, null, HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * 정적 리소스 404 처리
+     * 존재하지 않는 정적 리소스에 대한 요청
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleNoResourceFound(NoResourceFoundException e) {
+        log.warn("존재하지 않는 리소스 요청: {} {}", e.getHttpMethod(), e.getResourcePath());
+        
+        String message = String.format("요청하신 리소스를 찾을 수 없습니다: %s %s", 
+                e.getHttpMethod(), e.getResourcePath());
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(message, null, HttpStatus.NOT_FOUND));
     }
 
     /**

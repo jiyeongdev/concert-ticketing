@@ -23,6 +23,11 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         use_sql_comments: false
+        jdbc:
+          time_zone: UTC
+        types:
+          java-time:
+            jdbc-type: TIMESTAMP
   h2:
     console:
       enabled: true
@@ -99,7 +104,6 @@ logging:
 # cors:
 #   allowed-origins:
 #     - http://localhost:3000
-#     - https://www.myrecipe.top
 
 # AWS 설정
 aws:
@@ -125,4 +129,14 @@ server:
   address: 0.0.0.0
   port: 8080  # 필요에 따라 포트 설정
   shutdown: graceful
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
 

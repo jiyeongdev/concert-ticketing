@@ -93,6 +93,9 @@ dependencies {
 
     // Utils
     implementation 'org.fusesource.jansi:jansi:1.18'
+    
+    // Jackson JSR310 (Java 8 Date/Time support)
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
 
     // CloudWatch Logs
@@ -103,6 +106,11 @@ dependencies {
 
     // Environment Variables
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+    // MapStruct for object mapping
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
 }
 

@@ -23,4 +23,7 @@ public class SignupRequest {
     private String name;
     
     private String phone;
+    
+    // role 필드 추가 (선택사항, 기본값은 USER)
+    private String role = "USER";
 } 
