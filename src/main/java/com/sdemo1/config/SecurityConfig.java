@@ -1,6 +1,5 @@
 package com.sdemo1.config;
 
-import com.sdemo1.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

@@ -2,7 +2,6 @@ package com.sdemo1.controller;
 
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.dto.ConcertDto;
-import com.sdemo1.entity.Member;
 import com.sdemo1.service.ConcertService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
