@@ -1,0 +1,128 @@
+spring:
+  application:
+    name: sdemo1
+  thymeleaf:
+    prefix: classpath:/templates/ #Thymeleaf 템플릿 파일 경로입니다. (/templates/ 폴더를 기준으로 설정)
+    suffix: .html
+    cache: false  # 템플릿 캐싱 비활성화하여 변경 사항이 즉시 반영되도록 설정 (개발 시 유용)
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    connection-timeout: 10000 # 10초로 늘리기
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        ddl-auto: update
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            scope:
+              - email
+              - profile
+              - openid
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+  config:
+    import: optional:file:/app/config/dev-api.env
+
+# Redis 설정
+redis:
+  host: localhost
+  port: 6379
+  database: 0
+  timeout: 10000
+  lettuce:
+    pool:
+      max-active: 8
+      max-idle: 8
+      min-idle: 0
+      max-wait: -1
+
+# JWT 설정
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-validity-in-seconds: 86400 #300 #5분  #86400 # 24시간
+  refresh-token-validity-in-seconds: 1209600  # 14일
+  admin-token-validity-in-seconds: 31536000    # 1년
+  admin-token: ${ADMIN-TOKEN} # 관리자 토큰
+  cookie:
+    refresh-token:
+      name: refreshToken
+      http-only: true
+      secure: true
+      path: /
+      max-age: 1209600  # 14일
+      same-site: None
+      domain: fridgepal.com
+
+logging:
+  level:
+    com.sdemo1: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+    com.sdemo1.config.AsyncConfig: INFO  # 프로덕션에서는 INFO 레벨만 
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /var/log/application.log
+    max-size: 10MB
+    max-history: 30
+
+# CORS 설정
+# cors:
+#   allowed-origins:
+#     - http://localhost:3000
+#     - https://www.myrecipe.top
+
+# AWS 설정
+aws:
+  s3:
+    bucket: myrecipe-bucket
+    recipe-folder: recipe
+    region: ap-northeast-3
+
+# 스레드 풀 동적 설정
+thread-pool:
+  recipe-recommendation:
+    core-pool-size: ${RECIPE_CORE_POOL_SIZE:0}  # 기본값: CPU 코어의 절반
+    max-pool-size: ${RECIPE_MAX_POOL_SIZE:0}    # 기본값: CPU 코어 수
+    queue-capacity: ${RECIPE_QUEUE_CAPACITY:0} # 기본값: CPU 코어 * 5
+    keep-alive-seconds: ${RECIPE_KEEP_ALIVE:60} # 기본값: 60초
+  notification:
+    core-pool-size: ${NOTIFICATION_CORE_POOL_SIZE:0}  # 기본값: CPU 코어의 1/4
+    max-pool-size: ${NOTIFICATION_MAX_POOL_SIZE:0}    # 기본값: CPU 코어의 절반
+    queue-capacity: ${NOTIFICATION_QUEUE_CAPACITY:00} # 기본값: CPU 코어 * 2
+    keep-alive-seconds: ${NOTIFICATION_KEEP_ALIVE:30} # 기본값: 30초
+
+server:
+  address: 0.0.0.0
+  port: 8080  # 필요에 따라 포트 설정
+  shutdown: graceful
+
