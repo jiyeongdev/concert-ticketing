@@ -1,6 +1,12 @@
 spring:
   application:
     name: sdemo1
+  # 디버깅 모드에서 파라미터 정보 활성화
+  main:
+    allow-bean-definition-overriding: true
+  # JVM 옵션 설정
+  jvm:
+    args: -parameters
   thymeleaf:
     prefix: classpath:/templates/ #Thymeleaf 템플릿 파일 경로입니다. (/templates/ 폴더를 기준으로 설정)
     suffix: .html
@@ -159,9 +165,21 @@ queue:
   concert:
     waiting-prefix: "concert.waiting."
     processing-prefix: "concert.processing."
-    entry-interval-seconds: 30
-    max-wait-time-minutes: 120
-    hold-duration-minutes: 10
-    # 예매 시작 전 대기열 참가 가능 시간 (시간)
+    # 예매 시작 전 대기열 입장 가능 시간 (시간)
     join-start-hours: 4
-
+    # 예매 시작 후 입장 간격 (초)
+    entry-interval-seconds: 30
+    # 예매 시작 후 그룹당 동시 입장 가능한 인원 수
+    group-size: 10
+    # 최대 대기 시간 (분)
+    max-wait-time-minutes: 120
+    # 좌석 점유 유지 시간 (분)
+    hold-duration-minutes: 10
+    # 예상 대기 시간 계산 시 최대 시간 (분)
+    max-estimated-wait-time: 120
+  # Redis TTL 설정 (분 단위)
+  redis:
+    ttl:
+      waiting: 240   # 대기열 대기 상태 TTL (4시간)
+      ready: 5       # 예매 입장 준비 상태 TTL (5분)
+      entered: 1     # 예매 페이지 입장 완료 상태 TTL (1분)

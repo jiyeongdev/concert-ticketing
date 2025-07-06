@@ -1,6 +1,12 @@
 spring:
   application:
     name: sdemo1
+  # 디버깅 모드에서 파라미터 정보 활성화
+  main:
+    allow-bean-definition-overriding: true
+  # JVM 옵션 설정
+  jvm:
+    args: -parameters
   thymeleaf:
     prefix: classpath:/templates/ #Thymeleaf 템플릿 파일 경로입니다. (/templates/ 폴더를 기준으로 설정)
     suffix: .html
@@ -10,10 +16,10 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
   datasource:
-    url: jdbc:mysql://my-recipe-db.cfmy4ce0y0zq.ap-northeast-3.rds.amazonaws.com:3306/food
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: admin
-    password: belle3079!
+    url: ${DB_URL}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     connection-timeout: 10000 # 10초로 늘리기
   jpa:
     show-sql: false
@@ -23,6 +29,11 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         use_sql_comments: false
+        jdbc:
+          time_zone: UTC
+        types:
+          java-time:
+            jdbc-type: TIMESTAMP
   h2:
     console:
       enabled: true
@@ -55,7 +66,7 @@ redis:
   host: localhost
   port: 6379
   database: 0
-  timeout: 10000
+  timeout: 2000ms
   lettuce:
     pool:
       max-active: 8
@@ -82,11 +93,12 @@ jwt:
 
 logging:
   level:
-    com.sdemo1: INFO
+    com.sdemo1: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
     com.sdemo1.config.AsyncConfig: INFO  # 프로덕션에서는 INFO 레벨만 
+    org.springframework.amqp: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
@@ -99,7 +111,6 @@ logging:
 # cors:
 #   allowed-origins:
 #     - http://localhost:3000
-#     - https://www.myrecipe.top
 
 # AWS 설정
 aws:
@@ -125,4 +136,50 @@ server:
   address: 0.0.0.0
   port: 8080  # 필요에 따라 포트 설정
   shutdown: graceful
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
 
+# RabbitMQ 설정
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  listener:
+    simple:
+      concurrency: 5
+      max-concurrency: 10
+      prefetch: 1
+      default-requeue-rejected: false
+
+# 대기열 설정
+queue:
+  concert:
+    waiting-prefix: "concert.waiting."
+    processing-prefix: "concert.processing."
+    # 예매 시작 전 대기열 입장 가능 시간 (시간)
+    join-start-hours: 4
+    # 예매 시작 후 입장 간격 (초)
+    entry-interval-seconds: 30
+    # 예매 시작 후 그룹당 동시 입장 가능한 인원 수
+    group-size: 10
+    # 최대 대기 시간 (분)
+    max-wait-time-minutes: 120
+    # 좌석 점유 유지 시간 (분)
+    hold-duration-minutes: 10
+    # 예상 대기 시간 계산 시 최대 시간 (분)
+    max-estimated-wait-time: 120
+  # Redis TTL 설정 (분 단위)
+  redis:
+    ttl:
+      waiting: 240   # 대기열 대기 상태 TTL (4시간)
+      ready: 5       # 예매 입장 준비 상태 TTL (5분)
+      entered: 1     # 예매 페이지 입장 완료 상태 TTL (1분)

@@ -125,8 +125,16 @@ compileJava {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
     options.debug = true
     options.debugOptions.debugLevel = "source,lines,vars"
+}
+
+// 모든 Java 컴파일 태스크에 파라미터 정보 포함
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << '-parameters'
+    }
 }
 
 tasks.named('test') {

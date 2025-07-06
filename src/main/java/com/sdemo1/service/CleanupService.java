@@ -1,7 +1,7 @@
 package com.sdemo1.service;
 
 import com.sdemo1.service.impl.SeatReservationServiceImpl;
-import com.sdemo1.service.impl.WaitingQueueServiceImpl;
+import com.sdemo1.service.queue.EnhancedWaitingQueueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CleanupService {
 
-    private final WaitingQueueServiceImpl waitingQueueService;
+    private final EnhancedWaitingQueueService enhancedWaitingQueueService;
     private final SeatReservationServiceImpl seatReservationService;
 
     /**
@@ -22,7 +22,7 @@ public class CleanupService {
     public void cleanupExpiredQueues() {
         try {
             log.info("=== 만료된 대기열 정리 스케줄러 실행 ===");
-            waitingQueueService.cleanupExpiredQueues();
+            enhancedWaitingQueueService.cleanupExpiredQueues();
         } catch (Exception e) {
             log.error("만료된 대기열 정리 중 오류 발생: {}", e.getMessage(), e);
         }

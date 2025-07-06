@@ -7,7 +7,6 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -22,17 +21,19 @@ public class QMember extends EntityPathBase<Member> {
 
     public final DateTimePath<java.sql.Timestamp> createdAt = createDateTime("createdAt", java.sql.Timestamp.class);
 
-    public final NumberPath<Integer> memberId = createNumber("memberId", Integer.class);
+    public final StringPath email = createString("email");
+
+    public final NumberPath<java.math.BigInteger> memberId = createNumber("memberId", java.math.BigInteger.class);
 
     public final DateTimePath<java.sql.Timestamp> modifiedAt = createDateTime("modifiedAt", java.sql.Timestamp.class);
 
     public final StringPath name = createString("name");
 
+    public final StringPath password = createString("password");
+
     public final StringPath phone = createString("phone");
 
     public final EnumPath<Member.Role> role = createEnum("role", Member.Role.class);
-
-    public final ListPath<MemberSocialAccount, QMemberSocialAccount> socialAccounts = this.<MemberSocialAccount, QMemberSocialAccount>createList("socialAccounts", MemberSocialAccount.class, QMemberSocialAccount.class, PathInits.DIRECT2);
 
     public QMember(String variable) {
         super(Member.class, forVariable(variable));
