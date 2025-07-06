@@ -1,5 +1,6 @@
 package com.sdemo1.security;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,6 +11,8 @@ import com.sdemo1.entity.Member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collections;
 
 @Slf4j
 @Service
@@ -38,6 +41,16 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
         
         log.info("사용자 정보: memberId={}, name={}, email={}", member.getMemberId(), member.getName(), member.getEmail());
-        return new CustomUserDetails(member);
+        
+        // CustomUserDetails 생성 (Builder 패턴 사용)
+        // 실제 암호화된 비밀번호를 설정하여 Spring Security가 올바르게 비교할 수 있도록 함
+        return CustomUserDetails.builder()
+                .memberId(member.getMemberId())
+                .name(member.getName())
+                .role(member.getRole().toString())
+                .phone(member.getPhone())
+                .password(member.getPassword()) // 실제 암호화된 비밀번호 설정
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + member.getRole())))
+                .build();
     }
 } 

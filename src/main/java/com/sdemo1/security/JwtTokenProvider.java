@@ -13,6 +13,7 @@ import com.sdemo1.entity.Member;
 import com.sdemo1.repository.MemberRepository;
 import com.sdemo1.util.JwtTokenUtil;
 
+import java.math.BigInteger;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -207,9 +208,18 @@ public class JwtTokenProvider {
         Claims claims = getClaimsFromToken(token);
         log.info("JWT 토큰 subject: {}", claims.getSubject());
         
+        // CustomUserDetails 생성
+        CustomUserDetails userDetails = CustomUserDetails.builder()
+                .memberId(new BigInteger(claims.getSubject()))
+                .name(claims.get("name", String.class))
+                .role(claims.get("role", String.class))
+                .phone(claims.get("phone", String.class))
+                .authorities(getAuthoritiesFromClaims(claims))
+                .build();
+        
         return new UsernamePasswordAuthenticationToken(
-            claims.getSubject(),   // 사용자 식별자 (memberId)
-            "",        // credentials (JWT에서는 비밀번호가 필요 없으므로 빈 문자열)
+            userDetails,   // CustomUserDetails 객체
+            "",           // credentials (빈 문자열로 설정)
             getAuthoritiesFromClaims(claims) // 권한 정보
         );
     }

@@ -1,5 +1,6 @@
 package com.sdemo1.entity;
 
+import com.sdemo1.config.TimeZoneConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -31,18 +32,19 @@ public class Concert {
 
     @Column(name = "concert_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @Convert(converter = TimeZoneConverter.class)
     private LocalDateTime concertDate;
 
     @Column(name = "open_time")
     @Temporal(TemporalType.TIMESTAMP)
+    @Convert(converter = TimeZoneConverter.class)
     private LocalDateTime openTime;
 
     @Column(name = "close_time")
     @Temporal(TemporalType.TIMESTAMP)
+    @Convert(converter = TimeZoneConverter.class)
     private LocalDateTime closeTime;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private java.sql.Timestamp createdAt;
-
-
 } 

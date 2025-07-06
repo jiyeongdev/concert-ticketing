@@ -33,6 +33,11 @@ public interface SeatRepository extends JpaRepository<Seat, BigInteger> {
     boolean existsByConcertId(BigInteger concertId);
     
     /**
+     * 콘서트 ID로 모든 좌석 조회
+     */
+    List<Seat> findByConcertId(BigInteger concertId);
+    
+    /**
      * 콘서트 ID, 행, 번호로 특정 좌석 조회
      */
     Seat findByConcertIdAndSeatRowAndSeatNumber(BigInteger concertId, String seatRow, String seatNumber);

@@ -1,38 +1,41 @@
 package com.sdemo1.security;
 
-import java.util.Collection;
-import java.util.Collections;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.sdemo1.entity.Member;
+import java.math.BigInteger;
+import java.util.Collection;
 
-import lombok.Getter;
-
-@Getter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
     
-    private final Member member;
-
-    public CustomUserDetails(Member member) {
-        this.member = member;
-    }
+    private BigInteger memberId;
+    private String name;
+    private String role;
+    private String phone;
+    private String password; // 실제 암호화된 비밀번호 저장
+    private Collection<? extends GrantedAuthority> authorities;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + member.getRole()));
+        return authorities;
     }
 
     @Override
     public String getPassword() {
-        return member.getPassword();
+        return password; // 실제 암호화된 비밀번호 반환
     }
 
     @Override
     public String getUsername() {
-        return member.getEmail();
+        return String.valueOf(memberId);
     }
 
     @Override

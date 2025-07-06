@@ -52,6 +52,8 @@ public class AuthController {
 
             // 비밀번호 암호화
             String encodedPassword = passwordEncoder.encode(request.getPassword());
+            log.info("비밀번호 인코딩 완료: 원본 길이={}, 인코딩 길이={}", 
+                    request.getPassword().length(), encodedPassword.length());
 
             // 회원 생성
             Member member = new Member();
@@ -101,6 +103,20 @@ public class AuthController {
     public ResponseEntity<ApiResponse<?>> login(@Valid @RequestBody LoginRequest request) {
         try {
             log.info("=== 로그인 시작 ===");
+            log.info("로그인 시도: email={}, password 길이={}", request.getEmail(), request.getPassword().length());
+            
+            // 사용자 존재 여부 먼저 확인
+            Member member = memberRepository.findByEmail(request.getEmail())
+                    .orElse(null);
+            
+            if (member == null) {
+                log.error("사용자를 찾을 수 없습니다: {}", request.getEmail());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>("이메일 또는 비밀번호가 올바르지 않습니다.", null, HttpStatus.UNAUTHORIZED));
+            }
+            
+            log.info("사용자 발견: memberId={}, 저장된 비밀번호 길이={}", 
+                    member.getMemberId(), member.getPassword().length());
             
             // 인증 처리
             Authentication authentication = authenticationManager.authenticate(
@@ -108,10 +124,6 @@ public class AuthController {
             );
             
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // 사용자 정보 조회
-            Member member = memberRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
             // JWT 토큰 생성
             String accessToken = jwtTokenProvider.createAccessToken(member);

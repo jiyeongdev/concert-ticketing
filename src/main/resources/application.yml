@@ -60,7 +60,7 @@ redis:
   host: localhost
   port: 6379
   database: 0
-  timeout: 10000
+  timeout: 2000ms
   lettuce:
     pool:
       max-active: 8
@@ -87,11 +87,12 @@ jwt:
 
 logging:
   level:
-    com.sdemo1: INFO
+    com.sdemo1: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
     com.sdemo1.config.AsyncConfig: INFO  # 프로덕션에서는 INFO 레벨만 
+    org.springframework.amqp: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
@@ -139,4 +140,28 @@ server:
   web:
     resources:
       add-mappings: false
+
+# RabbitMQ 설정
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  listener:
+    simple:
+      concurrency: 5
+      max-concurrency: 10
+      prefetch: 1
+      default-requeue-rejected: false
+
+# 대기열 설정
+queue:
+  concert:
+    waiting-prefix: "concert.waiting."
+    processing-prefix: "concert.processing."
+    entry-interval-seconds: 30
+    max-wait-time-minutes: 120
+    hold-duration-minutes: 10
+    # 예매 시작 전 대기열 참가 가능 시간 (시간)
+    join-start-hours: 4
 
