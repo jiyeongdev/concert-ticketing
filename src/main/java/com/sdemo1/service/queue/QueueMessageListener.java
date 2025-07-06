@@ -1,7 +1,7 @@
 package com.sdemo1.service.queue;
 
 import java.math.BigInteger;
-import com.sdemo1.dto.QueueMessage;
+import com.sdemo1.dto.QueueEntryMessage;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +15,14 @@ public class QueueMessageListener {
     private final RedisQueueService redisQueueService;
 
     /**
-     * 예매 입장 처리 메시지 리스너
+     * 큐 입장 처리 메시지 리스너
      * RabbitMQ에서 메시지를 받아서 Redis에 사용자 상태를 READY로 변경
      */
     @RabbitListener(queues = "#{@defaultProcessingQueue}")
-    public void handleReservationEntry(QueueMessage message) {
+    public void handleQueueEntry(QueueEntryMessage message) {
         try {
-            log.info("예매 입장 메시지 처리 시작: memberId={}, concertId={}", 
-                    message.getMemberId(), message.getConcertId());
+            log.info("콘서트별 큐 입장 메시지 처리 시작: memberId={}, concertId={}, concertTitle={}", 
+                    message.getMemberId(), message.getConcertId(), message.getConcertTitle());
 
             BigInteger memberId = message.getMemberId();
             BigInteger concertId = message.getConcertId();
@@ -31,15 +31,15 @@ public class QueueMessageListener {
             boolean success = redisQueueService.setUserReady(memberId, concertId);
             
             if (success) {
-                log.info("예매 입장 처리 완료: memberId={}, concertId={}", memberId, concertId);
+                log.info("콘서트별 큐 입장 처리 완료: memberId={}, concertId={}, concertTitle={}", 
+                        memberId, concertId, message.getConcertTitle());
             } else {
-                log.error("예매 입장 처리 실패: memberId={}, concertId={}", memberId, concertId);
+                log.error("콘서트별 큐 입장 처리 실패: memberId={}, concertId={}, concertTitle={}", 
+                        memberId, concertId, message.getConcertTitle());
             }
 
         } catch (Exception e) {
-            log.error("예매 입장 메시지 처리 중 오류 발생: message={}", message, e);
+            log.error("콘서트별 큐 입장 메시지 처리 중 오류 발생: message={}", message, e);
         }
     }
-
-
 } 

@@ -1,22 +1,27 @@
 package com.sdemo1.controller;
 
+import java.math.BigInteger;
+import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.dto.SeatStatusDto;
 import com.sdemo1.entity.Member;
 import com.sdemo1.request.HoldSeatRequest;
 import com.sdemo1.security.CustomUserDetails;
 import com.sdemo1.service.SeatReservationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
-import java.math.BigInteger;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -51,17 +56,13 @@ public class SeatReservationController {
     @PostMapping("/hold")
     public ResponseEntity<ApiResponse<?>> holdSeat(@Valid @RequestBody HoldSeatRequest request) {
         try {
-            BigInteger userId = getCurrentUserId();
-            log.info("=== 좌석 점유 API 호출: userId={}, seatId={} ===", userId, request.getSeatId());
+            BigInteger memberId = getCurrentMemberId();
+            log.info("=== 좌석 점유 API 호출: memberId={}, seatId={} ===", memberId, request.getSeatId());
             
-            SeatStatusDto result = seatReservationService.holdSeat(userId, request);
+            SeatStatusDto result = seatReservationService.holdSeat(memberId, request);
             
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse<>("좌석 점유 성공", result, HttpStatus.CREATED));
-        } catch (IllegalArgumentException e) {
-            log.error("좌석 점유 실패 - 잘못된 요청: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(e.getMessage(), null, HttpStatus.BAD_REQUEST));
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>("좌석 점유 성공", result, HttpStatus.OK));
         } catch (IllegalStateException e) {
             log.error("좌석 점유 실패 - 상태 오류: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -79,10 +80,10 @@ public class SeatReservationController {
     @DeleteMapping("/release/{seatId}")
     public ResponseEntity<ApiResponse<?>> releaseSeat(@PathVariable BigInteger seatId) {
         try {
-            BigInteger userId = getCurrentUserId();
-            log.info("=== 좌석 점유 해제 API 호출: userId={}, seatId={} ===", userId, seatId);
+            BigInteger memberId = getCurrentMemberId();
+            log.info("=== 좌석 점유 해제 API 호출: memberId={}, seatId={} ===", memberId, seatId);
             
-            seatReservationService.releaseSeat(userId, seatId);
+            seatReservationService.releaseSeat(memberId, seatId);
             
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("좌석 점유 해제 성공", null, HttpStatus.OK));
@@ -103,10 +104,10 @@ public class SeatReservationController {
     @GetMapping("/my-holds")
     public ResponseEntity<ApiResponse<?>> getUserHeldSeats() {
         try {
-            BigInteger userId = getCurrentUserId();
-            log.info("=== 사용자 점유 좌석 조회 API 호출: userId={} ===", userId);
+            BigInteger memberId = getCurrentMemberId();
+            log.info("=== 사용자 점유 좌석 조회 API 호출: memberId={} ===", memberId);
             
-            List<SeatStatusDto> result = seatReservationService.getUserHeldSeats(userId);
+            List<SeatStatusDto> result = seatReservationService.getUserHeldSeats(memberId);
             
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("점유 좌석 조회 성공", result, HttpStatus.OK));
@@ -123,10 +124,10 @@ public class SeatReservationController {
     @PostMapping("/confirm/{seatId}")
     public ResponseEntity<ApiResponse<?>> confirmReservation(@PathVariable BigInteger seatId) {
         try {
-            BigInteger userId = getCurrentUserId();
-            log.info("=== 좌석 예매 확정 API 호출: userId={}, seatId={} ===", userId, seatId);
+            BigInteger memberId = getCurrentMemberId();
+            log.info("=== 좌석 예매 확정 API 호출: memberId={}, seatId={} ===", memberId, seatId);
             
-            boolean result = seatReservationService.confirmReservation(userId, seatId);
+            boolean result = seatReservationService.confirmReservation(memberId, seatId);
             
             if (result) {
                 return ResponseEntity.ok()
@@ -169,7 +170,7 @@ public class SeatReservationController {
     /**
      * 현재 인증된 사용자의 ID 가져오기
      */
-    private BigInteger getCurrentUserId() {
+    private BigInteger getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("인증되지 않은 사용자입니다.");

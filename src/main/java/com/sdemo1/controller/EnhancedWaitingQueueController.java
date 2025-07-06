@@ -7,6 +7,7 @@ import com.sdemo1.request.JoinQueueRequest;
 import com.sdemo1.response.QueueStatusResponse;
 import com.sdemo1.security.CustomUserDetails;
 import com.sdemo1.service.queue.EnhancedWaitingQueueService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 public class EnhancedWaitingQueueController {
 
     private final EnhancedWaitingQueueService enhancedWaitingQueueService;
+
+    @Value("${queue.concert.group-size:10}")
+    private int groupSize;
 
     /**
      * 대기열 입장 요청 (10분 전부터 가능)
@@ -136,29 +139,27 @@ public class EnhancedWaitingQueueController {
     }
 
     /**
-     * 예매 오픈 처리 (관리자용)
-     * POST /api/v2/reservation/open/{concertId}
+     * 예매 시작 처리 (관리자용)
+     * POST /api/v2/booking/start/{concertId}
      */
-    @PostMapping("/reservation/open/{concertId}")
-    public ResponseEntity<ApiResponse<?>> openReservation(
-            @PathVariable("concertId") BigInteger concertId,
-            @RequestParam(defaultValue = "10") int batchSize) {
+    @PostMapping("/booking/start/{concertId}")
+    public ResponseEntity<ApiResponse<?>> startBooking(@PathVariable("concertId") BigInteger concertId) {
         try {
             checkAdminRole();
-            log.info("=== 예매 오픈 API 호출 (관리자): concertId={}, batchSize={} ===", concertId, batchSize);
+            log.info("=== 예매 시작 API 호출 (관리자): concertId={}, groupSize={} ===", concertId, groupSize);
             
-            enhancedWaitingQueueService.openReservation(concertId, batchSize);
+            enhancedWaitingQueueService.startBooking(concertId, groupSize);
             
             return ResponseEntity.ok()
-                    .body(new ApiResponse<>("예매 오픈 처리 성공", null, HttpStatus.OK));
+                    .body(new ApiResponse<>("예매 시작 처리 성공", null, HttpStatus.OK));
         } catch (AccessDeniedException e) {
             log.error("권한 없음: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResponse<>("ADMIN 권한이 필요합니다.", null, HttpStatus.FORBIDDEN));
         } catch (Exception e) {
-            log.error("예매 오픈 처리 실패: {}", e.getMessage(), e);
+            log.error("예매 시작 처리 실패: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("예매 오픈 처리 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
+                    .body(new ApiResponse<>("예매 시작 처리 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 

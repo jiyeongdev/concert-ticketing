@@ -1,5 +1,9 @@
 package com.sdemo1.service.queue;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.sdemo1.dto.QueueStatusResponseBuilder;
 import com.sdemo1.entity.Concert;
 import com.sdemo1.entity.Member;
@@ -7,16 +11,11 @@ import com.sdemo1.repository.ConcertRepository;
 import com.sdemo1.repository.MemberRepository;
 import com.sdemo1.request.JoinQueueRequest;
 import com.sdemo1.response.QueueStatusResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -169,10 +168,10 @@ public class EnhancedWaitingQueueService {
     }
 
     /**
-     * 예매 오픈 처리 (관리자/자동 트리거)
+     * 예매 시작 처리 (관리자/자동 트리거)
      */
-    public void openReservation(BigInteger concertId, int batchSize) {
-        log.info("예매 오픈 처리: concertId={}, batchSize={}", concertId, batchSize);
+    public void startBooking(BigInteger concertId, int batchSize) {
+        log.info("예매 시작 처리: concertId={}, batchSize={}", concertId, batchSize);
 
         // 콘서트 정보 조회
         Concert concert = concertRepository.findById(concertId)
@@ -197,11 +196,11 @@ public class EnhancedWaitingQueueService {
         // RabbitMQ에 메시지 발송 (순차 처리)
         for (String userId : topUsers) {
             BigInteger memberId = new BigInteger(userId);
-            rabbitMQService.sendToProcessingQueue(memberId, concertId, "User", concert.getTitle());
+            rabbitMQService.sendToProcessingQueue(memberId, concertId, concert.getTitle());
             log.info("예매 입장 메시지 발송: memberId={}, concertId={}", memberId, concertId);
         }
 
-        log.info("예매 오픈 처리 완료: concertId={}, processedUsers={}", concertId, topUsers.size());
+        log.info("예매 시작 처리 완료: concertId={}, processedUsers={}", concertId, topUsers.size());
     }
 
     /**

@@ -1,5 +1,10 @@
 package com.sdemo1.service.impl;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import com.sdemo1.dto.SeatStatusDto;
 import com.sdemo1.entity.Member;
 import com.sdemo1.entity.Seat;
@@ -9,16 +14,10 @@ import com.sdemo1.repository.SeatHoldRepository;
 import com.sdemo1.repository.SeatRepository;
 import com.sdemo1.request.HoldSeatRequest;
 import com.sdemo1.service.SeatReservationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -53,11 +52,11 @@ public class SeatReservationServiceImpl implements SeatReservationService {
     }
 
     @Override
-    public SeatStatusDto holdSeat(BigInteger userId, HoldSeatRequest request) {
-        log.info("좌석 점유 요청: userId={}, seatId={}", userId, request.getSeatId());
+    public SeatStatusDto holdSeat(BigInteger memberId, HoldSeatRequest request) {
+        log.info("좌석 점유 요청: memberId={}, seatId={}", memberId, request.getSeatId());
 
         // 사용자 존재 확인
-        Member member = memberRepository.findById(userId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 좌석 존재 확인
@@ -79,7 +78,7 @@ public class SeatReservationServiceImpl implements SeatReservationService {
         }
 
         // 사용자가 이미 다른 좌석을 점유하고 있는지 확인
-        List<SeatHold> userHolds = seatHoldRepository.findByUserIdAndNotExpired(userId, now);
+        List<SeatHold> userHolds = seatHoldRepository.findByUserIdAndNotExpired(memberId, now);
         if (!userHolds.isEmpty()) {
             throw new IllegalStateException("이미 다른 좌석을 점유하고 있습니다. 먼저 기존 좌석을 해제해주세요.");
         }
@@ -96,14 +95,14 @@ public class SeatReservationServiceImpl implements SeatReservationService {
         seat.setStatus(Seat.SeatStatus.HELD);
         seatRepository.save(seat);
 
-        log.info("좌석 점유 완료: userId={}, seatId={}, expireAt={}", userId, request.getSeatId(), savedHold.getHoldExpireAt());
+        log.info("좌석 점유 완료: memberId={}, seatId={}, expireAt={}", memberId, request.getSeatId(), savedHold.getHoldExpireAt());
 
         return convertToSeatStatusDto(seat, List.of(savedHold), now);
     }
 
     @Override
-    public void releaseSeat(BigInteger userId, BigInteger seatId) {
-        log.info("좌석 점유 해제: userId={}, seatId={}", userId, seatId);
+    public void releaseSeat(BigInteger memberId, BigInteger seatId) {
+        log.info("좌석 점유 해제: memberId={}, seatId={}", memberId, seatId);
 
         // 점유 정보 조회
         Optional<SeatHold> seatHoldOpt = seatHoldRepository.findBySeatIdAndNotExpired(seatId, LocalDateTime.now());
@@ -116,7 +115,7 @@ public class SeatReservationServiceImpl implements SeatReservationService {
         SeatHold seatHold = seatHoldOpt.get();
         
         // 점유한 사용자가 맞는지 확인
-        if (!seatHold.getUser().getMemberId().equals(userId)) {
+        if (!seatHold.getUser().getMemberId().equals(memberId)) {
             throw new IllegalStateException("본인이 점유한 좌석만 해제할 수 있습니다.");
         }
 
@@ -128,16 +127,16 @@ public class SeatReservationServiceImpl implements SeatReservationService {
         seat.setStatus(Seat.SeatStatus.AVAILABLE);
         seatRepository.save(seat);
 
-        log.info("좌석 점유 해제 완료: userId={}, seatId={}", userId, seatId);
+        log.info("좌석 점유 해제 완료: memberId={}, seatId={}", memberId, seatId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<SeatStatusDto> getUserHeldSeats(BigInteger userId) {
-        log.info("사용자 점유 좌석 조회: userId={}", userId);
+    public List<SeatStatusDto> getUserHeldSeats(BigInteger memberId) {
+        log.info("사용자 점유 좌석 조회: memberId={}", memberId);
 
         LocalDateTime now = LocalDateTime.now();
-        List<SeatHold> userHolds = seatHoldRepository.findByUserIdAndNotExpired(userId, now);
+        List<SeatHold> userHolds = seatHoldRepository.findByUserIdAndNotExpired(memberId, now);
 
         return userHolds.stream()
                 .map(hold -> convertToSeatStatusDto(hold.getSeat(), userHolds, now))
@@ -165,8 +164,8 @@ public class SeatReservationServiceImpl implements SeatReservationService {
     }
 
     @Override
-    public boolean confirmReservation(BigInteger userId, BigInteger seatId) {
-        log.info("좌석 예매 확정: userId={}, seatId={}", userId, seatId);
+    public boolean confirmReservation(BigInteger memberId, BigInteger seatId) {
+        log.info("좌석 예매 확정: memberId={}, seatId={}", memberId, seatId);
 
         // 점유 정보 조회
         Optional<SeatHold> seatHoldOpt = seatHoldRepository.findBySeatIdAndNotExpired(seatId, LocalDateTime.now());
@@ -178,7 +177,7 @@ public class SeatReservationServiceImpl implements SeatReservationService {
         SeatHold seatHold = seatHoldOpt.get();
         
         // 점유한 사용자가 맞는지 확인
-        if (!seatHold.getUser().getMemberId().equals(userId)) {
+        if (!seatHold.getUser().getMemberId().equals(memberId)) {
             throw new IllegalStateException("본인이 점유한 좌석만 예매할 수 있습니다.");
         }
 
@@ -190,7 +189,7 @@ public class SeatReservationServiceImpl implements SeatReservationService {
         // 점유 정보 삭제
         seatHoldRepository.delete(seatHold);
 
-        log.info("좌석 예매 확정 완료: userId={}, seatId={}", userId, seatId);
+        log.info("좌석 예매 확정 완료: memberId={}, seatId={}", memberId, seatId);
         return true;
     }
 

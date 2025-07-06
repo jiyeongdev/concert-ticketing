@@ -163,14 +163,30 @@ rabbitmq:
 # 대기열 설정
 queue:
   concert:
-    waiting-prefix: "concert.waiting."
-    processing-prefix: "concert.processing."
+    # 현재 사용하지 않음 (콘서트별 큐 대신 기본 큐 사용)
+    # waiting-prefix: "concert.waiting."
+    # processing-prefix: "concert.processing."
+    # Exchange 설정
+    exchanges:
+      waiting: "concert.waiting.exchange"
+      processing: "concert.processing.exchange"
+      dead-letter: "concert.dead.letter.exchange"
+    # 큐 이름 설정
+    queues:
+      waiting-default: "concert.waiting.default"
+      processing-default: "concert.processing.default"
+      dead-letter: "concert.dead.letter"
+    # 라우팅 키 설정
+    routing-keys:
+      processing: "processing"
+      waiting: "waiting"
+      dead-letter: "dead.letter"
     # 예매 시작 전 대기열 입장 가능 시간 (시간)
     join-start-hours: 4
     # 예매 시작 후 입장 간격 (초)
     entry-interval-seconds: 30
     # 예매 시작 후 그룹당 동시 입장 가능한 인원 수
-    group-size: 10
+    group-size: 3
     # 최대 대기 시간 (분)
     max-wait-time-minutes: 120
     # 좌석 점유 유지 시간 (분)

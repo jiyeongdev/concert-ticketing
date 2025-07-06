@@ -6,37 +6,39 @@ import org.springframework.stereotype.Component;
 @Component("queueNameResolver")
 public class QueueNameResolver {
 
-    @Value("${queue.concert.waiting-prefix}")
-    private String waitingPrefix;
+    @Value("${queue.concert.queues.waiting-default}")
+    private String waitingDefaultQueueName;
 
-    @Value("${queue.concert.processing-prefix}")
-    private String processingPrefix;
+    @Value("${queue.concert.queues.processing-default}")
+    private String processingDefaultQueueName;
 
     /**
-     * 대기열 큐 이름 해결
+     * 대기열 큐 이름 해결 (현재는 기본 큐만 사용)
      */
     public String resolveWaitingQueueName(String concertId) {
-        return waitingPrefix + concertId;
+        // 현재는 콘서트별 큐 대신 기본 큐 사용
+        return waitingDefaultQueueName;
     }
 
     /**
-     * 처리 큐 이름 해결
+     * 처리 큐 이름 해결 (현재는 기본 큐만 사용)
      */
     public String resolveProcessingQueueName(String concertId) {
-        return processingPrefix + concertId;
+        // 현재는 콘서트별 큐 대신 기본 큐 사용
+        return processingDefaultQueueName;
     }
 
     /**
-     * 기본 대기열 큐 이름 (테스트용)
+     * 기본 대기열 큐 이름
      */
     public String resolveDefaultWaitingQueueName() {
-        return waitingPrefix + "default";
+        return waitingDefaultQueueName;
     }
 
     /**
-     * 기본 처리 큐 이름 (테스트용)
+     * 기본 처리 큐 이름
      */
     public String resolveDefaultProcessingQueueName() {
-        return processingPrefix + "default";
+        return processingDefaultQueueName;
     }
 } 
