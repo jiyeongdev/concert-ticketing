@@ -63,10 +63,10 @@ spring:
 
 # Redis 설정
 redis:
-  host: localhost
-  port: 6379
-  database: 0
-  timeout: 2000ms
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  database: ${REDIS_DATABASE:0}
+  timeout: ${REDIS_TIMEOUT:2000ms}
   lettuce:
     pool:
       max-active: 8
@@ -80,7 +80,6 @@ jwt:
   access-token-validity-in-seconds: 86400 #300 #5분  #86400 # 24시간
   refresh-token-validity-in-seconds: 1209600  # 14일
   admin-token-validity-in-seconds: 31536000    # 1년
-  admin-token: ${ADMIN-TOKEN} # 관리자 토큰
   cookie:
     refresh-token:
       name: refreshToken
@@ -133,69 +132,66 @@ thread-pool:
     keep-alive-seconds: ${NOTIFICATION_KEEP_ALIVE:30} # 기본값: 30초
 
 server:
-  address: 0.0.0.0
-  port: 8080  # 필요에 따라 포트 설정
-  shutdown: graceful
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  port: ${SERVER_PORT:8080}
+  shutdown: ${SERVER_SHUTDOWN:graceful}
   error:
-    include-message: always
-    include-binding-errors: always
-    include-stacktrace: never
-    include-exception: false
+    include-message: ${SERVER_ERROR_INCLUDE_MESSAGE:always}
+    include-binding-errors: ${SERVER_ERROR_INCLUDE_BINDING_ERRORS:always}
+    include-stacktrace: ${SERVER_ERROR_INCLUDE_STACKTRACE:never}
+    include-exception: ${SERVER_ERROR_INCLUDE_EXCEPTION:false}
   mvc:
-    throw-exception-if-no-handler-found: true
+    throw-exception-if-no-handler-found: ${SERVER_MVC_THROW_EXCEPTION:true}
   web:
     resources:
-      add-mappings: false
+      add-mappings: ${SERVER_WEB_RESOURCES_ADD_MAPPINGS:false}
 
 # RabbitMQ 설정
 rabbitmq:
-  host: localhost
-  port: 5672
-  username: guest
-  password: guest
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+  username: ${RABBITMQ_USERNAME:guest}
+  password: ${RABBITMQ_PASSWORD:guest}
   listener:
     simple:
-      concurrency: 5
-      max-concurrency: 10
-      prefetch: 1
-      default-requeue-rejected: false
+      concurrency: ${RABBITMQ_CONCURRENCY:5}
+      max-concurrency: ${RABBITMQ_MAX_CONCURRENCY:10}
+      prefetch: ${RABBITMQ_PREFETCH:1}
+      default-requeue-rejected: ${RABBITMQ_DEFAULT_REQUEUE_REJECTED:false}
 
 # 대기열 설정
 queue:
   concert:
-    # 현재 사용하지 않음 (콘서트별 큐 대신 기본 큐 사용)
-    # waiting-prefix: "concert.waiting."
-    # processing-prefix: "concert.processing."
     # Exchange 설정
     exchanges:
-      waiting: "concert.waiting.exchange"
-      processing: "concert.processing.exchange"
-      dead-letter: "concert.dead.letter.exchange"
+      waiting: ${QUEUE_EXCHANGE_WAITING:concert.waiting.exchange}
+      processing: ${QUEUE_EXCHANGE_PROCESSING:concert.processing.exchange}
+      dead-letter: ${QUEUE_EXCHANGE_DEAD_LETTER:concert.dead.letter.exchange}
     # 큐 이름 설정
     queues:
-      waiting-default: "concert.waiting.default"
-      processing-default: "concert.processing.default"
-      dead-letter: "concert.dead.letter"
+      waiting-default: ${QUEUE_WAITING_DEFAULT:concert.waiting.default}
+      processing-default: ${QUEUE_PROCESSING_DEFAULT:concert.processing.default}
+      dead-letter: ${QUEUE_DEAD_LETTER:concert.dead.letter}
     # 라우팅 키 설정
     routing-keys:
-      processing: "processing"
-      waiting: "waiting"
-      dead-letter: "dead.letter"
+      processing: ${QUEUE_ROUTING_KEY_PROCESSING:processing}
+      waiting: ${QUEUE_ROUTING_KEY_WAITING:waiting}
+      dead-letter: ${QUEUE_ROUTING_KEY_DEAD_LETTER:dead.letter}
     # 예매 시작 전 대기열 입장 가능 시간 (시간)
-    join-start-hours: 4
+    join-start-hours: ${QUEUE_JOIN_START_HOURS:4}
     # 예매 시작 후 입장 간격 (초)
-    entry-interval-seconds: 30
+    entry-interval-seconds: ${QUEUE_ENTRY_INTERVAL_SECONDS:30}
     # 예매 시작 후 그룹당 동시 입장 가능한 인원 수
-    group-size: 3
+    group-size: ${QUEUE_GROUP_SIZE:3}
     # 최대 대기 시간 (분)
-    max-wait-time-minutes: 120
+    max-wait-time-minutes: ${QUEUE_MAX_WAIT_TIME_MINUTES:120}
     # 좌석 점유 유지 시간 (분)
-    hold-duration-minutes: 10
+    hold-duration-minutes: ${QUEUE_HOLD_DURATION_MINUTES:10}
     # 예상 대기 시간 계산 시 최대 시간 (분)
-    max-estimated-wait-time: 120
+    max-estimated-wait-time: ${QUEUE_MAX_ESTIMATED_WAIT_TIME:120}
   # Redis TTL 설정 (분 단위)
   redis:
     ttl:
-      waiting: 240   # 대기열 대기 상태 TTL (4시간)
-      ready: 5       # 예매 입장 준비 상태 TTL (5분)
-      entered: 1     # 예매 페이지 입장 완료 상태 TTL (1분)
+      waiting: ${QUEUE_REDIS_TTL_WAITING:240}   # 대기열 대기 상태 TTL (4시간)
+      ready: ${QUEUE_REDIS_TTL_READY:5}       # 예매 입장 준비 상태 TTL (5분)
+      entered: ${QUEUE_REDIS_TTL_ENTERED:1}     # 예매 페이지 입장 완료 상태 TTL (1분)

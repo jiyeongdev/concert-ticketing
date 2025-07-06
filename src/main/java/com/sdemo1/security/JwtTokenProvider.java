@@ -1,18 +1,5 @@
 package com.sdemo1.security;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Component;
-import com.sdemo1.entity.Member;
-import com.sdemo1.repository.MemberRepository;
-import com.sdemo1.util.JwtTokenUtil;
-
 import java.math.BigInteger;
 import java.security.Key;
 import java.util.Arrays;
@@ -20,12 +7,29 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.sdemo1.entity.Member;
+import com.sdemo1.repository.MemberRepository;
+import com.sdemo1.util.JwtTokenUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class JwtTokenProvider {
 
-    private final String adminToken;
     private final Key key;
     private final long accessTokenValidityInMilliseconds;
     private final long refreshTokenValidityInMilliseconds;
@@ -34,13 +38,10 @@ public class JwtTokenProvider {
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds,
             @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds,
-            @Value("${jwt.admin-token-validity-in-seconds:31536000}") long adminTokenValidityInSeconds,
-            @Value("${jwt.admin-token}") String adminToken,
             MemberRepository memberRepository) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.accessTokenValidityInMilliseconds = accessTokenValidityInSeconds * 1000;
         this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
-        this.adminToken = adminToken;
     }
 
     /**
@@ -116,14 +117,10 @@ public class JwtTokenProvider {
     /**
      * JWT 토큰 유효성 검증 및 인증 처리
      * @return Authentication 인증 객체 (유효한 토큰인 경우)
-     * @throws TokenValidationException 토큰이 유효하지 않은 경우
+     * 
      */
     public Authentication validateAndGetAuthentication(String token) {
         try {
-            if (isAdminToken(token)) {
-                return getAuthentication(token);
-            }
-            
             Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -132,7 +129,6 @@ public class JwtTokenProvider {
 
             log.info("토큰 검증 - 현재 시간: {}, 만료 시간: {}", 
                 getCurrentKoreaTime(), claims.getExpiration());
-                
             return getAuthentication(token);
         } catch (ExpiredJwtException e) {
             log.error("JWT 토큰이 만료되었습니다. 만료 시간: {}, 현재 시간: {}", 
@@ -195,19 +191,11 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 관리자 토큰 여부 확인
-     */
-    private boolean isAdminToken(String token) {
-        return adminToken != null && !adminToken.isEmpty() && adminToken.equals(token);
-    }
-
-    /**
      * JWT 토큰으로 인증 객체 생성
      */
     public Authentication getAuthentication(String token) {
         Claims claims = getClaimsFromToken(token);
         log.info("JWT 토큰 subject: {}", claims.getSubject());
-        
         // CustomUserDetails 생성
         CustomUserDetails userDetails = CustomUserDetails.builder()
                 .memberId(new BigInteger(claims.getSubject()))
@@ -216,7 +204,6 @@ public class JwtTokenProvider {
                 .phone(claims.get("phone", String.class))
                 .authorities(getAuthoritiesFromClaims(claims))
                 .build();
-        
         return new UsernamePasswordAuthenticationToken(
             userDetails,   // CustomUserDetails 객체
             "",           // credentials (빈 문자열로 설정)
@@ -228,14 +215,6 @@ public class JwtTokenProvider {
      * 토큰에서 Claims 추출
      */
     private Claims getClaimsFromToken(String token) {
-        if (isAdminToken(token)) {
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(adminToken)
-                    .getBody();
-        }
-        
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
