@@ -47,7 +47,7 @@ public class RedisSeatHoldService {
     private static final String HOLD_CONFLICT_ERROR_MESSAGE = "같은 콘서트에서 이미 다른 좌석을 점유하고 있습니다.";
     
     // seat:concerthold:{concertId}:{seatId} 패턴
-    private static final Pattern SEAT_HOLD_KEY_PATTERN = Pattern.compile("seat:concerthold:(\\d+):(\\d+)");
+    private static final Pattern SEAT_HOLD_KEY_PATTERN = Pattern.compile("seat:(concerthold|userhold):(\\d+):(\\d+)");
     
     // Redis 키 생성 함수형 인터페이스
     @FunctionalInterface
@@ -98,16 +98,19 @@ public class RedisSeatHoldService {
      */
     private void handleKeyExpiration(String expiredKey) {
         try {
-            // seat:concerthold 키인지 확인
+            // seat:concerthold 또는 seat:userhold 키인지 확인
             Matcher matcher = SEAT_HOLD_KEY_PATTERN.matcher(expiredKey);
             if (matcher.matches()) {
-                BigInteger concertId = new BigInteger(matcher.group(1));
-                BigInteger seatId = new BigInteger(matcher.group(2));
+                String keyType = matcher.group(1); // concerthold 또는 userhold
+                BigInteger concertId = new BigInteger(matcher.group(2));
+                BigInteger seatId = new BigInteger(matcher.group(3));
                 
-                log.info("좌석 점유 만료 감지: concertId={}, seatId={}", concertId, seatId);
+                log.info("좌석 점유 만료 감지: keyType={}, concertId={}, seatId={}", keyType, concertId, seatId);
                 
-                // 만료된 좌석의 점유자 찾기 (DB에서 조회)
+                // concerthold 키가 만료된 경우에만 DB 정리 수행
+                if ("concerthold".equals(keyType)) {
                 cleanupExpiredSeatHold(concertId, seatId);
+                }
             }
         } catch (Exception e) {
             log.error("키 만료 이벤트 처리 중 오류 발생: key={}", expiredKey, e);
@@ -119,27 +122,14 @@ public class RedisSeatHoldService {
      */
     private void cleanupExpiredSeatHold(BigInteger concertId, BigInteger seatId) {
         try {
-            // DB에서 해당 좌석의 점유 정보 조회
-            Seat seat = seatRepository.findById(seatId)
-                .orElse(null);
-            
-            if (seat != null) {
-                // 만료된 점유 정보 삭제
+            // DB에서 만료된 점유 정보 삭제
                 seatHoldRepository.deleteBySeatId(seatId);
                 
-                // Redis에서 해당 사용자의 점유 좌석 Set에서 제거
-                // DB에서 점유자 정보를 찾아서 정리
-                List<SeatHold> expiredHolds = seatHoldRepository.findBySeatIdAndExpired(seatId, LocalDateTime.now());
-                for (SeatHold hold : expiredHolds) {
-                    String userKey = String.format("seat:userhold:%d:%d", concertId, hold.getUser().getMemberId());
-                    redisTemplate.opsForSet().remove(userKey, seatId.toString());
-                    log.info("만료된 좌석 점유 정보 정리: concertId={}, seatId={}, memberId={}", 
-                        concertId, seatId, hold.getUser().getMemberId());
-                }
+            log.info("만료된 좌석 점유 정보 DB 정리 완료: concertId={}, seatId={}", concertId, seatId);
                 
-                // 실시간 이벤트 발행 (선택사항)
-                // eventPublisher.publishSeatRelease(concertId, seatId);
-            }
+            // TODO: 필요시 WebSocket을 통한 실시간 알림 추가
+            // webSocketMessageService.broadcastSeatRelease(concertId, seatId);
+            
         } catch (Exception e) {
             log.error("만료된 좌석 점유 정보 정리 중 오류 발생: concertId={}, seatId={}", concertId, seatId, e);
         }
@@ -400,9 +390,12 @@ public class RedisSeatHoldService {
         String userKey = USER_KEY_GENERATOR.generate(concertId, seatId, memberId);
         
         try {
-            // 좌석 점유 설정
+            // 좌석 점유 설정 (10분 TTL)
             redisTemplate.opsForValue().set(seatKey, memberId.toString(), HOLD_DURATION_SECONDS, TimeUnit.SECONDS);
+            
+            // 사용자 점유 좌석 Set에 추가 (10분 TTL)
             redisTemplate.opsForSet().add(userKey, seatId.toString());
+            redisTemplate.expire(userKey, HOLD_DURATION_SECONDS, TimeUnit.SECONDS);
             
             log.info("새로운 좌석 점유 설정 완료: concertId={}, seatId={}, memberId={}", concertId, seatId, memberId);
         } catch (Exception e) {

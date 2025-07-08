@@ -1,7 +1,7 @@
-package com.sdemo1.service.seat;
+package com.sdemo1.service.seat.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sdemo1.service.seat.SeatStatusEventPublisher.SeatStatusEvent;
+import com.sdemo1.service.seat.status.SeatStatusEventPublisher.SeatStatusEvent;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;

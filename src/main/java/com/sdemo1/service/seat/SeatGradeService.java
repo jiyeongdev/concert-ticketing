@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import com.sdemo1.common.utils.CacheInvalidationUtils;
 import com.sdemo1.common.utils.CacheKeyGenerator;
-import com.sdemo1.dto.SeatGradeDto;
+import com.sdemo1.dto.seat.SeatGradeDto;
 import com.sdemo1.entity.SeatGrade;
 import com.sdemo1.repository.SeatGradeRepository;
 import org.springframework.data.redis.core.RedisTemplate;

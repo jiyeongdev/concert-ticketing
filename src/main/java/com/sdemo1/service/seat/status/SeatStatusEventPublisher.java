@@ -1,8 +1,9 @@
-package com.sdemo1.service.seat;
+package com.sdemo1.service.seat.status;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sdemo1.service.seat.websocket.WebSocketMessageService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import com.sdemo1.common.utils.CacheInvalidationUtils;
 import com.sdemo1.common.utils.CacheKeyGenerator;
-import com.sdemo1.dto.SeatDto;
+import com.sdemo1.dto.seat.SeatDto;
 import com.sdemo1.entity.Concert;
 import com.sdemo1.entity.Seat;
 import com.sdemo1.entity.SeatGrade;

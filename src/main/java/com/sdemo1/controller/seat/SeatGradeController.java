@@ -1,9 +1,9 @@
-package com.sdemo1.controller;
+package com.sdemo1.controller.seat;
 
 import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
-import com.sdemo1.dto.SeatGradeDto;
+import com.sdemo1.dto.seat.SeatGradeDto;
 import com.sdemo1.service.seat.SeatGradeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
