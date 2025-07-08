@@ -4,14 +4,18 @@ import java.math.BigInteger;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.request.PaymentRequest;
 import com.sdemo1.security.CustomUserDetails;
+import com.sdemo1.service.PaymentCancelService;
 import com.sdemo1.service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReservationController {
 
     private final PaymentService paymentService;
+    private final PaymentCancelService paymentCancelService;
 
     /**
      * 결제 및 예매 확정
@@ -65,6 +70,35 @@ public class ReservationController {
             log.error("결제 처리 실패: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>("결제 처리 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    /**
+     * 결제 취소
+     */
+    @DeleteMapping("/payment/{paymentId}")
+    public ResponseEntity<ApiResponse<?>> cancelPayment(@PathVariable("paymentId") BigInteger paymentId,
+                                                      @RequestParam("reason") String reason) {
+        try {
+            BigInteger memberId = getCurrentMemberId();
+            log.info("=== 결제 취소 API 호출: memberId={}, paymentId={}, reason={} ===", 
+                memberId, paymentId, reason);
+            
+            // 결제 취소 처리
+            PaymentCancelService.CancelResult result = paymentCancelService.cancelPayment(memberId, paymentId, reason);
+            
+            if (result.isSuccess()) {
+                return ResponseEntity.ok()
+                        .body(new ApiResponse<>(result.getMessage(), result, HttpStatus.OK));
+            } else {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(result.getMessage(), result, HttpStatus.BAD_REQUEST));
+            }
+            
+        } catch (Exception e) {
+            log.error("결제 취소 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("결제 취소 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 

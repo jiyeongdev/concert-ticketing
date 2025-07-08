@@ -1,14 +1,25 @@
 package com.sdemo1.entity;
 
-import jakarta.persistence.*;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
@@ -43,6 +54,9 @@ public class Payment {
     @Column(name = "paid_at")
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime paidAt;
+
+    @Column(name = "attempt_number")
+    private Integer attemptNumber;
 
     public enum PaymentStatus {
         PENDING,
