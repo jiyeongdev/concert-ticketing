@@ -13,49 +13,49 @@
 
 ### 1. 모든 콘서트 조회
 ```
-GET /ck/concerts
+GET /concerts
 ```
 
 ### 2. 콘서트 ID로 조회
 ```
-GET /ck/concerts/{id}
+GET /concerts/{id}
 ```
 
 ### 3. 콘서트 제목으로 검색
 ```
-GET /ck/concerts/search?title={title}
+GET /concerts/search?title={title}
 ```
 
 ### 4. 콘서트 생성 (ADMIN만)
 ```
-POST /ck/concerts
+POST /concerts
 ```
 
 ### 5. 콘서트 수정 (ADMIN만)
 ```
-PUT /ck/concerts/{id}
+PUT /concerts/{id}
 ```
 
 ### 6. 콘서트 삭제 (ADMIN만)
 ```
-DELETE /ck/concerts/{id}
+DELETE /concerts/{id}
 ```
 
 ## 좌석등급 CRUD API
 
 ### 1. 콘서트의 모든 좌석등급 조회
 ```
-GET /ck/seat-grades/concert/{concertId}
+GET /seat-grades/concert/{concertId}
 ```
 
 ### 2. 좌석등급 ID로 조회
 ```
-GET /ck/seat-grades/{id}
+GET /seat-grades/{id}
 ```
 
 ### 3. 좌석등급 생성 (ADMIN만)
 ```
-POST /ck/seat-grades
+POST /seat-grades
 ```
 **요청 본문**:
 ```json
@@ -68,45 +68,79 @@ POST /ck/seat-grades
 
 ### 4. 좌석등급 수정 (ADMIN만)
 ```
-PUT /ck/seat-grades/{id}
+PUT /seat-grades/{id}
 ```
 
 ### 5. 좌석등급 삭제 (ADMIN만)
 ```
-DELETE /ck/seat-grades/{id}
+DELETE /seat-grades/{id}
+```
+
+## 대기열 API
+
+### 1. 대기열 참가
+```
+POST /queue/join
+```
+**요청 본문**:
+```json
+{
+  "concertId": 1
+}
+```
+
+### 2. 대기열 상태 조회
+```
+GET /queue/status/{concertId}
+```
+
+### 3. 대기열 입장 처리
+```
+POST /queue/enter/{concertId}
+```
+**주의**: 예매 시작 시간부터 순차적으로 입장 가능
+
+### 4. 대기열 나가기
+```
+DELETE /queue/leave/{concertId}
+```
+
+### 5. 콘서트 대기열 조회 (관리자용)
+```
+GET /queue/admin/{concertId}
 ```
 
 ## 좌석 CRUD API
 
 ### 1. 콘서트의 모든 좌석 조회
 ```
-GET /ck/seats/concert/{concertId}
+GET /seats/concert/{concertId}
 ```
 
 ### 2. 콘서트의 특정 등급 좌석 조회
 ```
-GET /ck/seats/concert/{concertId}/grade/{seatGradeId}
+GET /seats/concert/{concertId}/grade/{seatGradeId}
 ```
 
 ### 3. 콘서트의 특정 상태 좌석 조회
 ```
-GET /ck/seats/concert/{concertId}/status/{status}
+GET /seats/concert/{concertId}/status/{status}
 ```
 **상태**: AVAILABLE, HELD, BOOKED
 
 ### 4. 콘서트의 사용 가능한 좌석 수 조회
 ```
-GET /ck/seats/concert/{concertId}/available-count
+GET /seats/concert/{concertId}/available-count
 ```
 
 ### 5. 좌석 ID로 조회
 ```
-GET /ck/seats/{seatId}
+GET /seats/{seatId}
 ```
 
 ### 6. 좌석 생성 (ADMIN만) - 배열 형태로 1개 이상 생성 가능
 ```
-POST /ck/seats
+POST /seats
 ```
 **요청 본문** (단일 좌석):
 ```json
@@ -158,7 +192,7 @@ POST /ck/seats
 
 ### 6-1. 콘서트별 좌석 생성 (ADMIN만) - 콘서트 ID로 좌석들 생성
 ```
-POST /ck/seats/concert/{concertId}
+POST /seats/concert/{concertId}
 ```
 **요청 본문**:
 ```json
@@ -186,12 +220,12 @@ POST /ck/seats/concert/{concertId}
 
 ### 7. 좌석 수정 (ADMIN만)
 ```
-PUT /ck/seats/{seatId}
+PUT /seats/{seatId}
 ```
 
 ### 7-1. 콘서트별 좌석 수정 (ADMIN만) - 콘서트의 모든 좌석을 한번에 수정
 ```
-PUT /ck/seats/concert/{concertId}
+PUT /seats/concert/{concertId}
 ```
 **요청 본문**:
 ```json
@@ -219,17 +253,17 @@ PUT /ck/seats/concert/{concertId}
 
 ### 8. 좌석 삭제 (ADMIN만)
 ```
-DELETE /ck/seats/{seatId}
+DELETE /seats/{seatId}
 ```
 
 ### 8-1. 콘서트별 좌석 삭제 (ADMIN만) - 콘서트의 모든 좌석 삭제
 ```
-DELETE /ck/seats/concert/{concertId}
+DELETE /seats/concert/{concertId}
 ```
 
 ### 9. 좌석 상태 변경 (ADMIN만)
 ```
-PATCH /ck/seats/{seatId}/status/{status}
+PATCH /seats/{seatId}/status/{status}
 ```
 
 ## 좌석등급 예시
@@ -280,9 +314,9 @@ PATCH /ck/seats/{seatId}/status/{status}
 
 ### 캐시 무효화
 ```
-POST /ck/concerts/cache/clear      # 콘서트 캐시 무효화
-POST /ck/seat-grades/cache/clear   # 좌석등급 캐시 무효화
-POST /ck/seats/cache/clear         # 좌석 캐시 무효화
+POST /concerts/cache/clear      # 콘서트 캐시 무효화
+POST /seat-grades/cache/clear   # 좌석등급 캐시 무효화
+POST /seats/cache/clear         # 좌석 캐시 무효화
 ```
 - **권한**: ADMIN만
 
@@ -313,7 +347,7 @@ POST /ck/seats/cache/clear         # 좌석 캐시 무효화
 ### 1. 콘서트 생성 후 좌석등급 설정
 ```bash
 # 1. 콘서트 생성
-POST /ck/concerts
+POST /concerts
 {
   "title": "2024 봄 콘서트",
   "location": "올림픽공원",
@@ -323,7 +357,7 @@ POST /ck/concerts
 }
 
 # 2. 좌석등급 생성
-POST /ck/seat-grades
+POST /seat-grades
 {
   "concertId": 1,
   "gradeName": "VIP",
@@ -331,7 +365,7 @@ POST /ck/seat-grades
 }
 
 # 3. 좌석 생성 (좌표 포함)
-POST /ck/seats
+POST /seats
 {
   "concertId": 1,
   "seatGradeId": 1,
@@ -346,25 +380,25 @@ POST /ck/seats
 ### 2. 좌석 정보 조회
 ```bash
 # 모든 좌석 조회 (좌표 정보 포함)
-GET /ck/seats/concert/1
+GET /seats/concert/1
 
 # VIP 등급 좌석만 조회
-GET /ck/seats/concert/1/grade/1
+GET /seats/concert/1/grade/1
 
 # 사용 가능한 좌석만 조회
-GET /ck/seats/concert/1/status/AVAILABLE
+GET /seats/concert/1/status/AVAILABLE
 
 # 사용 가능한 좌석 수 조회
-GET /ck/seats/concert/1/available-count
+GET /seats/concert/1/available-count
 ```
 
 ### 3. 좌석등급 정보 조회
 ```bash
 # 콘서트의 모든 좌석등급 조회
-GET /ck/seat-grades/concert/1
+GET /seat-grades/concert/1
 
 # 특정 좌석등급 조회
-GET /ck/seat-grades/1
+GET /seat-grades/1
 ```
 
 ## API 구조의 장점

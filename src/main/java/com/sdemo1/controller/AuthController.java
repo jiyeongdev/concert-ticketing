@@ -1,14 +1,14 @@
 package com.sdemo1.controller;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.sdemo1.common.response.ApiResponse;
+import com.sdemo1.config.RefreshTokenCookieConfig;
 import com.sdemo1.entity.Member;
 import com.sdemo1.repository.MemberRepository;
 import com.sdemo1.request.LoginRequest;
 import com.sdemo1.request.SignupRequest;
 import com.sdemo1.security.JwtTokenProvider;
-import com.sdemo1.config.RefreshTokenCookieConfig;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -18,15 +18,18 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/ck/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

@@ -1,11 +1,11 @@
 package com.sdemo1.controller;
 
-import com.sdemo1.util.ThreadPoolMonitor;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.sdemo1.common.utils.ThreadPoolMonitor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 스레드 풀 상태 모니터링 API
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/thread-pool")
+@RequestMapping("/thread-pool")
 @RequiredArgsConstructor
 public class ThreadPoolController {
 

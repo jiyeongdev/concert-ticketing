@@ -57,7 +57,7 @@ for concert_id in "${concert_ids[@]}"; do
         echo -n "사용자 ${i} 로그인 중... "
         
         # 로그인
-        LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/ck/auth/login" \
+        LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/login" \
             -H "Content-Type: application/json" \
             -d "{
                 \"email\": \"$email\",
@@ -88,7 +88,7 @@ for concert_id in "${concert_ids[@]}"; do
             echo -n "사용자 ${i} 대기열 입장 중... "
             
             # 대기열 입장 API 호출
-            ENTER_RESPONSE=$(curl -s -X POST "$BASE_URL/ck/waiting-room/enter" \
+            ENTER_RESPONSE=$(curl -s -X POST "$BASE_URL/waiting-room/enter" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: Bearer ${user_tokens[$i]}" \
                 -d "{\"concertId\": $concert_id}")
@@ -147,7 +147,7 @@ for concert_id in "${concert_ids[@]}"; do
     if [ -n "${user_tokens[1]}" ]; then
         echo -e "${YELLOW}4. 대기열 상태 조회 (첫 번째 사용자)${NC}"
         
-        STATUS_RESPONSE=$(curl -s -X GET "$BASE_URL/ck/waiting-room/status/$concert_id" \
+        STATUS_RESPONSE=$(curl -s -X GET "$BASE_URL/waiting-room/status/$concert_id" \
             -H "Authorization: Bearer ${user_tokens[1]}")
         
         echo "대기열 상태: $STATUS_RESPONSE"
@@ -158,7 +158,7 @@ for concert_id in "${concert_ids[@]}"; do
     if [ -n "${user_tokens[25]}" ]; then
         echo -e "${YELLOW}5. 대기열 상태 조회 (25번째 사용자)${NC}"
         
-        STATUS_RESPONSE=$(curl -s -X GET "$BASE_URL/ck/waiting-room/status/$concert_id" \
+        STATUS_RESPONSE=$(curl -s -X GET "$BASE_URL/waiting-room/status/$concert_id" \
             -H "Authorization: Bearer ${user_tokens[25]}")
         
         echo "대기열 상태: $STATUS_RESPONSE"
@@ -169,7 +169,7 @@ for concert_id in "${concert_ids[@]}"; do
     if [ -n "${user_tokens[50]}" ]; then
         echo -e "${YELLOW}6. 대기열 상태 조회 (50번째 사용자)${NC}"
         
-        STATUS_RESPONSE=$(curl -s -X GET "$BASE_URL/ck/waiting-room/status/$concert_id" \
+        STATUS_RESPONSE=$(curl -s -X GET "$BASE_URL/waiting-room/status/$concert_id" \
             -H "Authorization: Bearer ${user_tokens[50]}")
         
         echo "대기열 상태: $STATUS_RESPONSE"

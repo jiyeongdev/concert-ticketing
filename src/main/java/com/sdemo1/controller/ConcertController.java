@@ -1,28 +1,37 @@
 package com.sdemo1.controller;
 
+import java.math.BigInteger;
+import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.dto.ConcertDto;
+import com.sdemo1.service.ConcertCacheService;
 import com.sdemo1.service.ConcertService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
-import java.math.BigInteger;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/ck/concerts")
+@RequestMapping("/concerts")
 @RequiredArgsConstructor
 public class ConcertController {
 
     private final ConcertService concertService;
+    private final ConcertCacheService concertCacheService;
 
     /**
      * 모든 콘서트 조회 (모든 사용자 접근 가능)
@@ -84,11 +93,13 @@ public class ConcertController {
      * 콘서트 수정 (ADMIN만 접근 가능)
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateConcert(@PathVariable BigInteger id, @Valid @RequestBody ConcertDto concertDto) {
+    public ResponseEntity<ApiResponse<?>> updateConcert(@PathVariable("id") BigInteger id, @Valid @RequestBody ConcertDto concertDto) {
         try {
             checkAdminRole();
             log.info("=== 콘서트 수정 API 호출: {} ===", id);
+            
             ConcertDto updatedConcert = concertService.updateConcert(id, concertDto);
+            
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("콘서트 수정 성공", updatedConcert, HttpStatus.OK));
         } catch (AccessDeniedException e) {
@@ -106,11 +117,13 @@ public class ConcertController {
      * 콘서트 삭제 (ADMIN만 접근 가능)
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteConcert(@PathVariable BigInteger id) {
+    public ResponseEntity<ApiResponse<?>> deleteConcert(@PathVariable("id") BigInteger id) {
         try {
             checkAdminRole();
             log.info("=== 콘서트 삭제 API 호출: {} ===", id);
+            
             concertService.deleteConcert(id);
+            
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("콘서트 삭제 성공", null, HttpStatus.OK));
         } catch (AccessDeniedException e) {
@@ -132,7 +145,7 @@ public class ConcertController {
         try {
             checkAdminRole();
             log.info("=== 콘서트 캐시 무효화 API 호출 ===");
-            concertService.clearCache();
+            concertCacheService.evictAllConcertCache();
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("캐시 무효화 성공", null, HttpStatus.OK));
         } catch (AccessDeniedException e) {

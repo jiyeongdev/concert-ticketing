@@ -73,6 +73,10 @@ redis:
       max-idle: 8
       min-idle: 0
       max-wait: -1
+  # Redis Key Events 활성화
+  key-events:
+    enabled: true
+    notify-keyspace-events: "Ex"
 
 # JWT 설정
 jwt:
@@ -191,6 +195,6 @@ queue:
   # Redis TTL 설정 (분 단위)
   redis:
     ttl:
-      waiting: ${QUEUE_REDIS_TTL_WAITING:240}   # 대기열 대기 상태 TTL (4시간)
-      ready: ${QUEUE_REDIS_TTL_READY:5}       # 예매 입장 준비 상태 TTL (5분)
-      entered: ${QUEUE_REDIS_TTL_ENTERED:1}     # 예매 페이지 입장 완료 상태 TTL (1분)
+      waiting-minutes: ${QUEUE_REDIS_TTL_WAITING_MINUTES:240}   # 대기열 대기 상태 TTL (4시간, 분 단위)
+      ready-minutes: ${QUEUE_REDIS_TTL_READY_MINUTES:60}       # 예매 입장 준비 상태 TTL (60분)
+      entered-minutes: ${QUEUE_REDIS_TTL_ENTERED_MINUTES:60}     # 예매 페이지 입장 완료 상태 TTL (60분)

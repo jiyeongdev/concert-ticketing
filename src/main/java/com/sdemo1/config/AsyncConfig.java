@@ -1,13 +1,12 @@
 package com.sdemo1.config;
 
+import java.util.concurrent.Executor;
+import com.sdemo1.common.utils.ThreadPoolMonitor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import lombok.extern.slf4j.Slf4j;
-import com.sdemo1.util.ThreadPoolMonitor;
-
-import java.util.concurrent.Executor;
 
 @Slf4j
 @Configuration

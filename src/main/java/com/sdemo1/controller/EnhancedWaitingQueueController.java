@@ -1,7 +1,6 @@
 package com.sdemo1.controller;
 
 import java.math.BigInteger;
-import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.request.JoinQueueRequest;
 import com.sdemo1.response.QueueStatusResponse;
@@ -10,7 +9,6 @@ import com.sdemo1.service.queue.EnhancedWaitingQueueService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/ck/waiting-room")
+@RequestMapping("/waiting-room")
 @RequiredArgsConstructor
 public class EnhancedWaitingQueueController {
 
@@ -36,7 +34,7 @@ public class EnhancedWaitingQueueController {
 
     /**
      * 대기열 입장 요청 (10분 전부터 가능)
-     * POST /api/v2/waiting-room/enter
+     * POST /v2/waiting-room/enter
      */
     @PostMapping("/enter")
     public ResponseEntity<ApiResponse<?>> enterWaitingRoom(@Valid @RequestBody JoinQueueRequest request) {
@@ -65,7 +63,7 @@ public class EnhancedWaitingQueueController {
 
     /**
      * 대기열 상태 조회
-     * GET /api/v2/waiting-room/status/{concertId}
+     * GET /v2/waiting-room/status/{concertId}
      */
     @GetMapping("/status/{concertId}")
     public ResponseEntity<ApiResponse<?>> getWaitingRoomStatus(@PathVariable("concertId") BigInteger concertId) {
@@ -94,7 +92,7 @@ public class EnhancedWaitingQueueController {
 
     /**
      * 대기열에서 나가기
-     * POST /api/v2/waiting-room/exit/{concertId}
+     * POST /v2/waiting-room/exit/{concertId}
      */
     @PostMapping("/exit/{concertId}")
     public ResponseEntity<ApiResponse<?>> leaveWaitingRoom(@PathVariable("concertId") BigInteger concertId) {
@@ -113,105 +111,7 @@ public class EnhancedWaitingQueueController {
         }
     }
 
-    /**
-     * 예매 토큰 발급 (사용자 입장 자격 확인)
-     * GET /api/v2/reservation/token/{concertId}
-     */
-    @GetMapping("/reservation/token/{concertId}")
-    public ResponseEntity<ApiResponse<?>> getReservationToken(@PathVariable("concertId") BigInteger concertId) {
-        try {
-            BigInteger memberId = getCurrentMemberId();
-            log.info("=== 예매 토큰 요청 API 호출: memberId={}, concertId={} ===", memberId, concertId);
-            
-            QueueStatusResponse result = enhancedWaitingQueueService.getReservationToken(memberId, concertId);
-            
-            return ResponseEntity.ok()
-                    .body(new ApiResponse<>("예매 토큰 발급 성공", result, HttpStatus.OK));
-        } catch (IllegalStateException e) {
-            log.error("예매 토큰 발급 실패 - 상태 오류: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResponse<>(e.getMessage(), null, HttpStatus.FORBIDDEN));
-        } catch (Exception e) {
-            log.error("예매 토큰 발급 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("예매 토큰 발급 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
-        }
-    }
 
-    /**
-     * 예매 시작 처리 (관리자용)
-     * POST /api/v2/booking/start/{concertId}
-     */
-    @PostMapping("/booking/start/{concertId}")
-    public ResponseEntity<ApiResponse<?>> startBooking(@PathVariable("concertId") BigInteger concertId) {
-        try {
-            checkAdminRole();
-            log.info("=== 예매 시작 API 호출 (관리자): concertId={}, groupSize={} ===", concertId, groupSize);
-            
-            enhancedWaitingQueueService.startBooking(concertId, groupSize);
-            
-            return ResponseEntity.ok()
-                    .body(new ApiResponse<>("예매 시작 처리 성공", null, HttpStatus.OK));
-        } catch (AccessDeniedException e) {
-            log.error("권한 없음: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResponse<>("ADMIN 권한이 필요합니다.", null, HttpStatus.FORBIDDEN));
-        } catch (Exception e) {
-            log.error("예매 시작 처리 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("예매 시작 처리 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
-        }
-    }
-
-    /**
-     * 관리자용 대기열 조회
-     * GET /api/v2/waiting-room/admin/{concertId}
-     */
-    @GetMapping("/admin/{concertId}")
-    public ResponseEntity<ApiResponse<?>> getWaitingRoomByConcertId(@PathVariable("concertId") BigInteger concertId) {
-        try {
-            checkAdminRole();
-            log.info("=== 관리자용 대기열 조회 API 호출: concertId={} ===", concertId);
-            
-            List<QueueStatusResponse> result = enhancedWaitingQueueService.getWaitingRoomByConcertId(concertId);
-            
-            return ResponseEntity.ok()
-                    .body(new ApiResponse<>("관리자용 대기열 조회 성공", result, HttpStatus.OK));
-        } catch (AccessDeniedException e) {
-            log.error("권한 없음: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResponse<>("ADMIN 권한이 필요합니다.", null, HttpStatus.FORBIDDEN));
-        } catch (Exception e) {
-            log.error("관리자용 대기열 조회 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("관리자용 대기열 조회 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
-        }
-    }
-
-    /**
-     * 만료된 대기열 정리 (관리자용)
-     * POST /api/v2/waiting-room/cleanup
-     */
-    @PostMapping("/cleanup")
-    public ResponseEntity<ApiResponse<?>> cleanupExpiredQueues() {
-        try {
-            checkAdminRole();
-            log.info("=== 만료된 대기열 정리 API 호출 (관리자) ===");
-            
-            enhancedWaitingQueueService.cleanupExpiredQueues();
-            
-            return ResponseEntity.ok()
-                    .body(new ApiResponse<>("만료된 대기열 정리 성공", null, HttpStatus.OK));
-        } catch (AccessDeniedException e) {
-            log.error("권한 없음: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResponse<>("ADMIN 권한이 필요합니다.", null, HttpStatus.FORBIDDEN));
-        } catch (Exception e) {
-            log.error("만료된 대기열 정리 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("만료된 대기열 정리 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
-        }
-    }
 
     // ========== Private Helper Methods ==========
 
@@ -225,16 +125,5 @@ public class EnhancedWaitingQueueController {
             return userDetails.getMemberId();
         }
         throw new IllegalStateException("로그인이 필요합니다.");
-    }
-
-    /**
-     * 관리자 권한 확인
-     */
-    private void checkAdminRole() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
-            throw new AccessDeniedException("ADMIN 권한이 필요합니다.");
-        }
     }
 } 

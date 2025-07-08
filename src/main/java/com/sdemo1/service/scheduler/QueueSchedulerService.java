@@ -21,11 +21,13 @@ public class QueueSchedulerService {
 
     @Value("${queue.concert.group-size:10}")
     private int groupSize;
+    @Value("${queue.concert.entry-interval-seconds:30}")
+    private int entryIntervalSeconds;
 
     /**
      * 매 30초마다 큐 오픈(입장) 처리
      */
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000999)
     public void openQueuesAutomatically() {
         LocalDateTime now = LocalDateTime.now();
         List<Concert> openTargets = concertRepository.findByOpenTimeLessThanEqualAndCloseTimeAfter(now, now);
@@ -40,19 +42,17 @@ public class QueueSchedulerService {
     }
 
     /**
-     * 매 1분마다 큐 종료 정리
+     * 큐 종료 정리 - TTL 기반 자동 정리로 대체됨
+     * 
+     * Redis TTL 설정:
+     * - 대기열 대기 상태: 240분 (4시간)
+     * - 예매 입장 준비 상태: 60분
+     * - 예매 페이지 입장 완료 상태: 60분
+     * 
+     * TTL이 만료되면 Redis에서 자동으로 삭제되므로 별도 정리 로직 불필요
      */
-    @Scheduled(fixedRate = 60000)
-    public void cleanupClosedQueues() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Concert> closedTargets = concertRepository.findByCloseTimeLessThanEqual(now);
-        for (Concert concert : closedTargets) {
-            try {
-                log.info("[스케줄러] 콘서트 {} 큐 종료 정리", concert.getId());
-                enhancedWaitingQueueService.cleanupExpiredQueues();
-            } catch (Exception e) {
-                log.error("[스케줄러] 콘서트 {} 큐 종료 정리 실패: {}", concert.getId(), e.getMessage(), e);
-            }
-        }
-    }
+    // @Scheduled(fixedRate = 60000) // 주석 처리 - TTL 기반 자동 정리
+    // public void cleanupClosedQueues() {
+    //     // TTL이 자동으로 처리하므로 불필요
+    // }
 } 

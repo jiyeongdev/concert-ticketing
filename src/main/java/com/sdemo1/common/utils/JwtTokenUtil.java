@@ -1,15 +1,13 @@
-package com.sdemo1.util;
+package com.sdemo1.common.utils;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
+import javax.crypto.SecretKey;
+import com.sdemo1.entity.Member;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import javax.crypto.SecretKey;
-import com.sdemo1.entity.Member;
-
+import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;

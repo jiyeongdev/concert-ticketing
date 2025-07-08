@@ -1,60 +1,70 @@
 package com.sdemo1.controller;
 
+import java.math.BigInteger;
+import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.dto.SeatGradeDto;
-import com.sdemo1.service.SeatGradeService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.sdemo1.service.seat.SeatGradeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
-import java.math.BigInteger;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/ck/seat-grades")
+@RequestMapping("/seat-grades")
 @RequiredArgsConstructor
 public class SeatGradeController {
 
     private final SeatGradeService seatGradeService;
 
     /**
-     * 콘서트의 모든 좌석등급 조회 (모든 사용자 접근 가능)
+     * 콘서트별 좌석등급 조회
      */
     @GetMapping("/concert/{concertId}")
-    public ResponseEntity<ApiResponse<?>> getSeatGradesByConcertId(@PathVariable BigInteger concertId) {
+    public ResponseEntity<ApiResponse<?>> getSeatGradesByConcertId(@PathVariable("concertId") BigInteger concertId) {
         try {
-            log.info("=== 콘서트 좌석등급 조회 API 호출: {} ===", concertId);
+            log.info("=== 콘서트별 좌석등급 조회 API 호출: {} ===", concertId);
+            
             List<SeatGradeDto> seatGrades = seatGradeService.getSeatGradesByConcertId(concertId);
+            
             return ResponseEntity.ok()
-                    .body(new ApiResponse<>("좌석등급 목록 조회 성공", seatGrades, HttpStatus.OK));
+                    .body(new ApiResponse<>("콘서트별 좌석등급 조회 성공", seatGrades, HttpStatus.OK));
         } catch (Exception e) {
-            log.error("좌석등급 목록 조회 실패: {}", e.getMessage(), e);
+            log.error("콘서트별 좌석등급 조회 실패: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("좌석등급 목록 조회 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
+                    .body(new ApiResponse<>("콘서트별 좌석등급 조회 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 
     /**
-     * 좌석등급 ID로 조회 (모든 사용자 접근 가능)
+     * 좌석등급 상세 조회
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getSeatGradeById(@PathVariable BigInteger id) {
+    public ResponseEntity<ApiResponse<?>> getSeatGradeById(@PathVariable("id") BigInteger id) {
         try {
-            log.info("=== 좌석등급 조회 API 호출: {} ===", id);
+            log.info("=== 좌석등급 상세 조회 API 호출: {} ===", id);
+            
             SeatGradeDto seatGrade = seatGradeService.getSeatGradeById(id);
+            
             return ResponseEntity.ok()
-                    .body(new ApiResponse<>("좌석등급 조회 성공", seatGrade, HttpStatus.OK));
+                    .body(new ApiResponse<>("좌석등급 상세 조회 성공", seatGrade, HttpStatus.OK));
         } catch (Exception e) {
-            log.error("좌석등급 조회 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>("좌석등급 조회 실패: " + e.getMessage(), null, HttpStatus.NOT_FOUND));
+            log.error("좌석등급 상세 조회 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("좌석등급 상세 조회 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 
@@ -84,11 +94,13 @@ public class SeatGradeController {
      * 좌석등급 수정 (ADMIN만 접근 가능)
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateSeatGrade(@PathVariable BigInteger id, @Valid @RequestBody SeatGradeDto seatGradeDto) {
+    public ResponseEntity<ApiResponse<?>> updateSeatGrade(@PathVariable("id") BigInteger id, @Valid @RequestBody SeatGradeDto seatGradeDto) {
         try {
             checkAdminRole();
             log.info("=== 좌석등급 수정 API 호출: {} ===", id);
+            
             SeatGradeDto updatedSeatGrade = seatGradeService.updateSeatGrade(id, seatGradeDto);
+            
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("좌석등급 수정 성공", updatedSeatGrade, HttpStatus.OK));
         } catch (AccessDeniedException e) {
@@ -106,11 +118,13 @@ public class SeatGradeController {
      * 좌석등급 삭제 (ADMIN만 접근 가능)
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteSeatGrade(@PathVariable BigInteger id) {
+    public ResponseEntity<ApiResponse<?>> deleteSeatGrade(@PathVariable("id") BigInteger id) {
         try {
             checkAdminRole();
             log.info("=== 좌석등급 삭제 API 호출: {} ===", id);
+            
             seatGradeService.deleteSeatGrade(id);
+            
             return ResponseEntity.ok()
                     .body(new ApiResponse<>("좌석등급 삭제 성공", null, HttpStatus.OK));
         } catch (AccessDeniedException e) {
@@ -121,28 +135,6 @@ public class SeatGradeController {
             log.error("좌석등급 삭제 실패: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>("좌석등급 삭제 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
-        }
-    }
-
-    /**
-     * 캐시 무효화 (ADMIN만 접근 가능)
-     */
-    @PostMapping("/cache/clear")
-    public ResponseEntity<ApiResponse<?>> clearCache() {
-        try {
-            checkAdminRole();
-            log.info("=== 좌석등급 캐시 무효화 API 호출 ===");
-            seatGradeService.clearCache();
-            return ResponseEntity.ok()
-                    .body(new ApiResponse<>("캐시 무효화 성공", null, HttpStatus.OK));
-        } catch (AccessDeniedException e) {
-            log.error("권한 없음: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResponse<>("ADMIN 권한이 필요합니다.", null, HttpStatus.FORBIDDEN));
-        } catch (Exception e) {
-            log.error("캐시 무효화 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("캐시 무효화 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 

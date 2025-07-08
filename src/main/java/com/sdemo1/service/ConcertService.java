@@ -1,18 +1,19 @@
 package com.sdemo1.service;
 
+import java.math.BigInteger;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import com.sdemo1.common.utils.CacheInvalidationUtils;
+import com.sdemo1.common.utils.CacheKeyGenerator;
 import com.sdemo1.dto.ConcertDto;
 import com.sdemo1.entity.Concert;
 import com.sdemo1.repository.ConcertRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigInteger;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -21,59 +22,98 @@ import java.util.stream.Collectors;
 public class ConcertService {
 
     private final ConcertRepository concertRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final CacheInvalidationUtils cacheInvalidationUtils;
 
     /**
      * 모든 콘서트 조회 (캐시 적용)
      */
-    @Cacheable(value = "concerts", key = "'all'")
     public List<ConcertDto> getAllConcerts() {
-        log.info("=== 모든 콘서트 조회 (캐시 적용) ===");
-        return concertRepository.findAllByOrderByConcertDateAsc()
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        String cacheKey = CacheKeyGenerator.getAllConcertsKey();
+        
+        List<ConcertDto> concerts = (List<ConcertDto>) redisTemplate.opsForValue().get(cacheKey);
+        if (concerts == null) {
+            log.info("=== 모든 콘서트 조회 (DB) ===");
+            concerts = concertRepository.findAllByOrderByConcertDateAsc()
+                    .stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+            
+            redisTemplate.opsForValue().set(cacheKey, concerts, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            log.info("=== 콘서트 캐시 저장: {} ===", cacheKey);
+        } else {
+            log.info("=== 모든 콘서트 조회 (캐시) ===");
+        }
+        
+        return concerts;
     }
 
     /**
      * 콘서트 ID로 조회 (캐시 적용)
      */
-    @Cacheable(value = "concerts", key = "#id")
     public ConcertDto getConcertById(BigInteger id) {
-        log.info("=== 콘서트 조회: {} ===", id);
-        Concert concert = concertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("콘서트를 찾을 수 없습니다: " + id));
-        return convertToDto(concert);
+        String cacheKey = CacheKeyGenerator.getConcertByIdKey(id);
+        
+        ConcertDto concert = (ConcertDto) redisTemplate.opsForValue().get(cacheKey);
+        if (concert == null) {
+            log.info("=== 콘서트 조회 (DB): {} ===", id);
+            Concert concertEntity = concertRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("콘서트를 찾을 수 없습니다: " + id));
+            concert = convertToDto(concertEntity);
+            
+            redisTemplate.opsForValue().set(cacheKey, concert, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            log.info("=== 콘서트 캐시 저장: {} ===", cacheKey);
+        } else {
+            log.info("=== 콘서트 조회 (캐시): {} ===", id);
+        }
+        
+        return concert;
     }
 
     /**
      * 콘서트 제목으로 검색 (캐시 적용)
      */
-    @Cacheable(value = "concerts", key = "'search_' + #title")
     public List<ConcertDto> searchConcertsByTitle(String title) {
-        log.info("=== 콘서트 제목 검색: {} ===", title);
-        return concertRepository.findByTitleContainingIgnoreCase(title)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        String cacheKey = CacheKeyGenerator.getConcertSearchKey(title);
+        
+        List<ConcertDto> concerts = (List<ConcertDto>) redisTemplate.opsForValue().get(cacheKey);
+        if (concerts == null) {
+            log.info("=== 콘서트 제목 검색 (DB): {} ===", title);
+            concerts = concertRepository.findByTitleContainingIgnoreCase(title)
+                    .stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+            
+            redisTemplate.opsForValue().set(cacheKey, concerts, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            log.info("=== 콘서트 검색 캐시 저장: {} ===", cacheKey);
+        } else {
+            log.info("=== 콘서트 제목 검색 (캐시): {} ===", title);
+        }
+        
+        return concerts;
     }
 
     /**
      * 콘서트 생성 (캐시 무효화)
      */
-    @CacheEvict(value = "concerts", allEntries = true)
     public ConcertDto createConcert(ConcertDto concertDto) {
         log.info("=== 콘서트 생성: {} ===", concertDto.title());
+        
         Concert concert = convertToEntity(concertDto);
         Concert savedConcert = concertRepository.save(concert);
+        
+        // 관련 캐시 무효화
+        cacheInvalidationUtils.invalidateConcertCaches();
+        
         return convertToDto(savedConcert);
     }
 
     /**
      * 콘서트 수정 (캐시 무효화)
      */
-    @CacheEvict(value = "concerts", allEntries = true)
     public ConcertDto updateConcert(BigInteger id, ConcertDto concertDto) {
         log.info("=== 콘서트 수정: {} ===", id);
+        
         Concert existingConcert = concertRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("콘서트를 찾을 수 없습니다: " + id));
         
@@ -84,29 +124,43 @@ public class ConcertService {
         existingConcert.setCloseTime(concertDto.closeTime());
         
         Concert updatedConcert = concertRepository.save(existingConcert);
+        
+        // 관련 캐시 무효화
+        cacheInvalidationUtils.invalidateConcertCaches();
+        
         return convertToDto(updatedConcert);
     }
 
     /**
      * 콘서트 삭제 (캐시 무효화)
      */
-    @CacheEvict(value = "concerts", allEntries = true)
     public void deleteConcert(BigInteger id) {
         log.info("=== 콘서트 삭제: {} ===", id);
-        if (!concertRepository.existsById(id)) {
-            throw new RuntimeException("콘서트를 찾을 수 없습니다: " + id);
-        }
         concertRepository.deleteById(id);
+        
+        // 관련 캐시 무효화
+        cacheInvalidationUtils.invalidateConcertCaches();
     }
 
     /**
-     * 캐시 무효화
+     * 콘서트 캐시 무효화
      */
-    @CacheEvict(value = "concerts", allEntries = true)
-    public void clearCache() {
-        log.info("=== 콘서트 캐시 무효화 ===");
+    public void evictConcertCache(BigInteger concertId) {
+        log.info("=== 콘서트 캐시 무효화: {} ===", concertId);
+        cacheInvalidationUtils.invalidateConcertCache(concertId);
     }
 
+    /**
+     * 모든 콘서트 캐시 무효화
+     */
+    public void clearAllCache() {
+        log.info("=== 모든 콘서트 캐시 무효화 ===");
+        cacheInvalidationUtils.clearAllConcertCaches();
+    }
+
+    /**
+     * Entity를 DTO로 변환
+     */
     private ConcertDto convertToDto(Concert concert) {
         return new ConcertDto(
             concert.getId(),
@@ -118,6 +172,9 @@ public class ConcertService {
         );
     }
 
+    /**
+     * DTO를 Entity로 변환
+     */
     private Concert convertToEntity(ConcertDto concertDto) {
         Concert concert = new Concert();
         concert.setTitle(concertDto.title());

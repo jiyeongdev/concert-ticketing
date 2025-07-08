@@ -1,16 +1,15 @@
 package com.sdemo1.service.queue;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import com.sdemo1.common.UserStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -19,18 +18,17 @@ public class RedisQueueService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String WAITING_ROOM_KEY = "waiting_room";
     private static final String USER_STATUS_PREFIX = "user:";
     private static final String CONCERT_PREFIX = "concert:";
 
     // TTL 설정 (분 단위)
-    @Value("${queue.redis.ttl.waiting:5}")
+    @Value("${queue.redis.ttl.waiting-minutes:5}")
     private int waitingTtlMinutes;
 
-    @Value("${queue.redis.ttl.ready:5}")
+    @Value("${queue.redis.ttl.ready-minutes:60}")
     private int readyTtlMinutes;
 
-    @Value("${queue.redis.ttl.entered:1}")
+    @Value("${queue.redis.ttl.entered-minutes:60}")
     private int enteredTtlMinutes;
 
     @Value("${queue.concert.max-estimated-wait-time:120}")
@@ -59,7 +57,7 @@ public class RedisQueueService {
                 redisTemplate.expire(concertKey, waitingTtlMinutes, TimeUnit.MINUTES);
                 
                 // 사용자 상태를 WAITING으로 설정 (설정된 TTL)
-                redisTemplate.opsForValue().set(userStatusKey, "WAITING", waitingTtlMinutes, TimeUnit.MINUTES);
+                redisTemplate.opsForValue().set(userStatusKey, UserStatus.WAITING.getValue(), waitingTtlMinutes, TimeUnit.MINUTES);
                 
                 log.info("대기열 등록 성공: memberId={}, concertId={}, score={}, ttl={}분", 
                         memberId, concertId, score, waitingTtlMinutes);
@@ -85,8 +83,10 @@ public class RedisQueueService {
             Object status = redisTemplate.opsForValue().get(userStatusKey);
             if (status != null) {
                 String statusStr = status.toString();
+                // UserStatus enum을 사용하여 상태 확인
                 // WAITING, READY, ENTERED 상태 모두 대기열에 있는 것으로 간주
-                return "WAITING".equals(statusStr) || "READY".equals(statusStr) || "ENTERED".equals(statusStr);
+                UserStatus userStatus = UserStatus.fromString(statusStr);
+                return userStatus.isInQueue();
             }
             
             // 상태 키가 없는 경우 ZSet에서 확인 (레거시 데이터 처리)
@@ -197,7 +197,7 @@ public class RedisQueueService {
         
         try {
             // 설정된 TTL로 READY 상태 설정
-            redisTemplate.opsForValue().set(userStatusKey, "READY", readyTtlMinutes, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set(userStatusKey, UserStatus.READY.getValue(), readyTtlMinutes, TimeUnit.MINUTES);
             log.info("사용자 상태를 READY로 변경: memberId={}, concertId={}, ttl={}분", 
                     memberId, concertId, readyTtlMinutes);
             return true;
@@ -230,7 +230,7 @@ public class RedisQueueService {
         
         try {
             // 설정된 TTL로 ENTERED 상태 설정
-            redisTemplate.opsForValue().set(userStatusKey, "ENTERED", enteredTtlMinutes, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set(userStatusKey, UserStatus.ENTERED.getValue(), enteredTtlMinutes, TimeUnit.MINUTES);
             log.info("사용자 상태를 ENTERED로 변경: memberId={}, concertId={}, ttl={}분", 
                     memberId, concertId, enteredTtlMinutes);
             return true;
@@ -261,19 +261,6 @@ public class RedisQueueService {
                 queueNumber, entryIntervalSeconds, estimatedMinutesDouble, estimatedMinutes, result);
         
         return result;
-    }
-
-    /**
-     * 만료된 대기열 정리
-     */
-    public void cleanupExpiredQueues() {
-        try {
-            // Redis의 TTL 기능으로 자동 만료 처리
-            // 추가 정리 작업이 필요한 경우 여기서 처리
-            log.info("만료된 대기열 정리 완료");
-        } catch (Exception e) {
-            log.error("만료된 대기열 정리 실패", e);
-        }
     }
 
 

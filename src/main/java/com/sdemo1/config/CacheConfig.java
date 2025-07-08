@@ -1,5 +1,6 @@
 package com.sdemo1.config;
 
+import java.time.Duration;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -10,8 +11,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import java.time.Duration;
 
 @Configuration
 @EnableCaching
@@ -31,6 +30,8 @@ public class CacheConfig {
                     config.entryTtl(Duration.ofHours(2))) // 콘서트는 2시간 캐시
                 .withCacheConfiguration("seats", 
                     config.entryTtl(Duration.ofMinutes(30))) // 좌석은 30분 캐시
+                .withCacheConfiguration("seatGrades", 
+                    config.entryTtl(Duration.ofHours(1))) // 좌석등급은 1시간 캐시
                 .build();
     }
 } 

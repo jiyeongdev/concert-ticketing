@@ -3,7 +3,7 @@ package com.sdemo1.service.queue;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import com.sdemo1.common.UserStatus;
 import com.sdemo1.dto.QueueStatusResponseBuilder;
 import com.sdemo1.entity.Concert;
 import com.sdemo1.entity.Member;
@@ -107,17 +107,18 @@ public class EnhancedWaitingQueueService {
         }
 
         // 사용자 상태 확인 (우선순위: READY > ENTERED > WAITING > NOT_IN_QUEUE)
-        String userStatus = redisQueueService.getUserStatus(memberId, concertId);
+        String userStatusStr = redisQueueService.getUserStatus(memberId, concertId);
+        UserStatus userStatus = UserStatus.fromString(userStatusStr);
         
-        if ("READY".equals(userStatus)) {
+        if (userStatus.isReady()) {
             return responseBuilder.buildReadyResponse(concertId, concert);
         }
         
-        if ("ENTERED".equals(userStatus)) {
+        if (userStatus.isEntered()) {
             return responseBuilder.buildEnteredResponse(concertId, concert);
         }
         
-        if ("WAITING".equals(userStatus)) {
+        if (userStatus.isWaiting()) {
             // 대기 순번 조회
             Long queueNumber = redisQueueService.getUserQueueNumber(memberId, concertId);
             Long totalWaitingCount = redisQueueService.getWaitingCount(concertId);
@@ -206,7 +207,7 @@ public class EnhancedWaitingQueueService {
     /**
      * 예매 토큰 발급 (사용자 입장 자격 확인)
      */
-    public QueueStatusResponse getReservationToken(BigInteger memberId, BigInteger concertId) {
+    public QueueStatusResponse getBookingToken(BigInteger memberId, BigInteger concertId) {
         log.info("예매 토큰 요청: memberId={}, concertId={}", memberId, concertId);
 
         // 콘서트 정보 조회
@@ -214,10 +215,11 @@ public class EnhancedWaitingQueueService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콘서트입니다."));
 
         // 사용자 상태 확인
-        String userStatus = redisQueueService.getUserStatus(memberId, concertId);
+        String userStatusStr = redisQueueService.getUserStatus(memberId, concertId);
+        UserStatus userStatus = UserStatus.fromString(userStatusStr);
         
-        if (!"READY".equals(userStatus)) {
-            throw new IllegalStateException("예매 입장 자격이 없습니다. 상태: " + userStatus);
+        if (!userStatus.isReady()) {
+            throw new IllegalStateException("예매 입장 자격이 없습니다. 상태: " + userStatus.getDescription());
         }
 
         // 사용자 정보 조회
@@ -230,55 +232,6 @@ public class EnhancedWaitingQueueService {
         log.info("예매 토큰 발급 완료: memberId={}, concertId={}", memberId, concertId);
 
         return responseBuilder.buildEnteredResponse(concertId, concert);
-    }
-
-    /**
-     * 관리자용 대기열 조회
-     */
-    @Transactional(readOnly = true)
-    public List<QueueStatusResponse> getWaitingRoomByConcertId(BigInteger concertId) {
-        log.info("관리자용 대기열 조회: concertId={}", concertId);
-
-        // 콘서트 정보 조회
-        Concert concert = concertRepository.findById(concertId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콘서트입니다."));
-
-        // 예매 종료 시간 체크
-        if (isBookingClosed(concert)) {
-            log.warn("콘서트 {} 예매가 종료되었습니다.", concert.getId());
-            return List.of();
-        }
-
-        // Redis에서 대기자 목록 조회 (상위 100명만)
-        List<String> waitingUsers = redisQueueService.getTopWaitingUsers(concertId, 100);
-        
-        return waitingUsers.stream()
-                .map(userId -> {
-                    BigInteger memberId = new BigInteger(userId);
-                    Long queueNumber = redisQueueService.getUserQueueNumber(memberId, concertId);
-                    String userStatus = redisQueueService.getUserStatus(memberId, concertId);
-                    
-                    return responseBuilder.buildAdminResponse(
-                            concertId,
-                            concert,
-                            memberId,
-                            queueNumber.intValue(),
-                            waitingUsers.size(),
-                            redisQueueService.calculateEstimatedWaitTime(queueNumber, entryIntervalSeconds),
-                            responseBuilder.calculateEstimatedEnterTime(concert, queueNumber),
-                            userStatus
-                    );
-                })
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 만료된 대기열 정리
-     */
-    public void cleanupExpiredQueues() {
-        log.info("만료된 대기열 정리 시작");
-        redisQueueService.cleanupExpiredQueues();
-        log.info("만료된 대기열 정리 완료");
     }
 
     // ========== Private Helper Methods ==========

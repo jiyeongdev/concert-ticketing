@@ -1,12 +1,12 @@
 package com.sdemo1.config;
 
-import com.sdemo1.interceptor.LoggingInterceptor;
 import com.sdemo1.interceptor.AuthenticationInterceptor;
-import lombok.RequiredArgsConstructor;
+import com.sdemo1.interceptor.LoggingInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authenticationInterceptor)
                 .addPathPatterns("/**")  // 모든 경로에 대해 인증 체크
                 .excludePathPatterns(
-                    "/ck/auth/**",      // 인증 관련 경로 제외
+                    "/auth/**",      // 인증 관련 경로 제외
                     "/health-check",    // 헬스체크 제외
                     "/static/**",       // 정적 리소스 제외
                     "/error"            // 에러 페이지 제외

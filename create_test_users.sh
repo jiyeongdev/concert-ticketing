@@ -30,7 +30,7 @@ for i in $(seq 1 $TOTAL_USERS); do
     echo -n "사용자 ${i} 생성 중... "
     
     # 회원가입
-    SIGNUP_RESPONSE=$(curl -s -X POST "$BASE_URL/ck/auth/signup" \
+    SIGNUP_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/signup" \
         -H "Content-Type: application/json" \
         -d "{
             \"email\": \"$email\",
@@ -67,6 +67,6 @@ echo "비밀번호: password123"
 echo ""
 
 echo "로그인 테스트:"
-echo "curl -X POST $BASE_URL/ck/auth/login \\"
+echo "curl -X POST $BASE_URL/auth/login \\"
 echo "  -H \"Content-Type: application/json\" \\"
 echo "  -d '{\"email\": \"user1@test.com\", \"password\": \"password123\"}'" 

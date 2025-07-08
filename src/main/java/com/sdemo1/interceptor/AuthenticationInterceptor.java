@@ -1,12 +1,10 @@
 package com.sdemo1.interceptor;
 
+import java.util.Arrays;
+import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.security.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -14,9 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import java.util.Arrays;
-import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -28,7 +27,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     // 인증이 필요하지 않은 경로들
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
-        "/ck/auth/",
+        "/auth/",
         "/health-check",
         "/static/",
         "/error",
@@ -38,13 +37,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     // 관리자만 접근 가능한 경로들
     private static final List<String> ADMIN_PATHS = Arrays.asList(
         "/admin/",
-        "/api/admin/"
+        "/admin/"
     );
 
     // 읽기 전용 경로들 (GET 요청만 허용)
     private static final List<String> READ_ONLY_PATHS = Arrays.asList(
-        "/api/foods",
-        "/api/categories"
     );
 
     @Override

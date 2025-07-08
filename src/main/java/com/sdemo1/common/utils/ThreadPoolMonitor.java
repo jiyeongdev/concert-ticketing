@@ -1,10 +1,10 @@
-package com.sdemo1.util;
+package com.sdemo1.common.utils;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.Executor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 스레드 풀 상태 모니터링 유틸리티
