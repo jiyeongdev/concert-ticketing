@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/seats")
 @RequiredArgsConstructor
-@Tag(name = "7. 좌석 관리", description = "좌석 조회, 생성, 수정, 삭제 API")
+@Tag(name = "4. 좌석 관리", description = "좌석 조회, 생성, 수정, 삭제 API")
 public class SeatController {
 
     private final SeatService seatService;

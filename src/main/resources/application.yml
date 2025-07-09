@@ -38,45 +38,38 @@ spring:
     console:
       enabled: true
       path: /h2-console
-      
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${GOOGLE_REDIRECT_URI}
-            scope:
-              - email
-              - profile
-              - openid
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/auth
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-            user-name-attribute: sub
-
+  
   config:
     import: optional:file:/app/config/dev-api.env
 
-# Redis 설정
-redis:
-  host: ${REDIS_HOST:localhost}
-  port: ${REDIS_PORT:6379}
-  database: ${REDIS_DATABASE:0}
-  timeout: ${REDIS_TIMEOUT:2000ms}
-  lettuce:
-    pool:
-      max-active: 8
-      max-idle: 8
-      min-idle: 0
-      max-wait: -1
-  # Redis Key Events 활성화
-  key-events:
-    enabled: true
-    notify-keyspace-events: "Ex"
+  # Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      timeout: ${REDIS_TIMEOUT:2000ms}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1
+      # Redis Key Events 활성화
+      notify-keyspace-events: "Ex"
+
+  # RabbitMQ 설정
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        concurrency: ${RABBITMQ_CONCURRENCY:5}
+        max-concurrency: ${RABBITMQ_MAX_CONCURRENCY:10}
+        prefetch: ${RABBITMQ_PREFETCH:1}
+        default-requeue-rejected: ${RABBITMQ_DEFAULT_REQUEUE_REJECTED:false}
 
 # JWT 설정
 jwt:
@@ -109,31 +102,6 @@ logging:
     max-size: 10MB
     max-history: 30
 
-# CORS 설정
-# cors:
-#   allowed-origins:
-#     - http://localhost:3000
-
-# AWS 설정
-aws:
-  s3:
-    bucket: myrecipe-bucket
-    recipe-folder: recipe
-    region: ap-northeast-3
-
-# 스레드 풀 동적 설정
-thread-pool:
-  recipe-recommendation:
-    core-pool-size: ${RECIPE_CORE_POOL_SIZE:0}  # 기본값: CPU 코어의 절반
-    max-pool-size: ${RECIPE_MAX_POOL_SIZE:0}    # 기본값: CPU 코어 수
-    queue-capacity: ${RECIPE_QUEUE_CAPACITY:0} # 기본값: CPU 코어 * 5
-    keep-alive-seconds: ${RECIPE_KEEP_ALIVE:60} # 기본값: 60초
-  notification:
-    core-pool-size: ${NOTIFICATION_CORE_POOL_SIZE:0}  # 기본값: CPU 코어의 1/4
-    max-pool-size: ${NOTIFICATION_MAX_POOL_SIZE:0}    # 기본값: CPU 코어의 절반
-    queue-capacity: ${NOTIFICATION_QUEUE_CAPACITY:00} # 기본값: CPU 코어 * 2
-    keep-alive-seconds: ${NOTIFICATION_KEEP_ALIVE:30} # 기본값: 30초
-
 server:
   address: ${SERVER_ADDRESS:0.0.0.0}
   port: ${SERVER_PORT:8080}
@@ -149,18 +117,19 @@ server:
     resources:
       add-mappings: ${SERVER_WEB_RESOURCES_ADD_MAPPINGS:false}
 
-# RabbitMQ 설정
-rabbitmq:
-  host: ${RABBITMQ_HOST:localhost}
-  port: ${RABBITMQ_PORT:5672}
-  username: ${RABBITMQ_USERNAME:guest}
-  password: ${RABBITMQ_PASSWORD:guest}
-  listener:
-    simple:
-      concurrency: ${RABBITMQ_CONCURRENCY:5}
-      max-concurrency: ${RABBITMQ_MAX_CONCURRENCY:10}
-      prefetch: ${RABBITMQ_PREFETCH:1}
-      default-requeue-rejected: ${RABBITMQ_DEFAULT_REQUEUE_REJECTED:false}
+# Swagger/OpenAPI 설정
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
 
 # 대기열 설정
 queue:

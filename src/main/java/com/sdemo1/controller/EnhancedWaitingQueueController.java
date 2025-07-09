@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/waiting-room")
 @RequiredArgsConstructor
-@Tag(name = "3. 대기열 관리", description = "대기열 입장/퇴장, 상태 조회 API")
+@Tag(name = "6. 대기열 관리", description = "대기열 입장/퇴장, 상태 조회 API")
 public class EnhancedWaitingQueueController {
 
     private final EnhancedWaitingQueueService enhancedWaitingQueueService;

@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/members")
 @RequiredArgsConstructor
-@Tag(name = "6. 회원 관리", description = "회원 정보 조회, 프로필 수정 API")
+@Tag(name = "2. 회원 관리", description = "회원 정보 조회, 프로필 수정 API")
 public class MemberController {
 
     private final MemberService memberService;

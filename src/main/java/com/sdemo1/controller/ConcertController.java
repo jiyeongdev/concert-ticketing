@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/concerts")
 @RequiredArgsConstructor
-@Tag(name = "2. 콘서트 관리", description = "콘서트 조회, 검색, 관리 API")
+@Tag(name = "5. 콘서트 관리", description = "콘서트 조회, 검색, 관리 API")
 public class ConcertController {
 
     private final ConcertService concertService;

@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/booking")
 @RequiredArgsConstructor
-@Tag(name = "4. 예매 관리", description = "예매 토큰 발급, 좌석 점유/해제, 실시간 좌석 상태 조회 API")
+@Tag(name = "7. 예매 관리", description = "예매 토큰 발급, 좌석 점유/해제, 실시간 좌석 상태 조회 API")
 public class BookingController {
 
     private final SeatStatusService seatStatusService;

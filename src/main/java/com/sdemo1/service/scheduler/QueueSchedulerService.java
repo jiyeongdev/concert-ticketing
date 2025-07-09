@@ -27,7 +27,7 @@ public class QueueSchedulerService {
     /**
      * 매 30초마다 큐 오픈(입장) 처리
      */
-    @Scheduled(fixedRate = 30000999)
+    @Scheduled(fixedRate = 30000)
     public void openQueuesAutomatically() {
         LocalDateTime now = LocalDateTime.now();
         List<Concert> openTargets = concertRepository.findByOpenTimeLessThanEqualAndCloseTimeAfter(now, now);

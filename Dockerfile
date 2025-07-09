@@ -5,9 +5,10 @@ FROM gradle:8.5-jdk21 AS builder
 WORKDIR /app
 
 # Gradle 파일들을 먼저 복사 (캐시 최적화)
-COPY build.gradle settings.gradle ./
+COPY build.gradle ./
 COPY gradle ./gradle
 COPY gradlew ./
+COPY gradlew.bat ./
 
 # 의존성 다운로드
 RUN gradle dependencies --no-daemon
@@ -18,8 +19,8 @@ COPY src ./src
 # 애플리케이션 빌드
 RUN gradle build -x test --no-daemon
 
-# 런타임 이미지
-FROM openjdk:21-jre-slim
+# 런타임 이미지 - 더 안정적인 Eclipse Temurin 이미지 사용
+FROM eclipse-temurin:21-jre
 
 # 작업 디렉토리 설정
 WORKDIR /app

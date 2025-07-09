@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/reservation")
 @RequiredArgsConstructor
-@Tag(name = "5. 예매/결제 관리", description = "결제 처리, 결제 취소 API")
+@Tag(name = "8. 예매/결제 관리", description = "결제 처리, 결제 취소 API")
 public class ReservationController {
 
     private final PaymentService paymentService;

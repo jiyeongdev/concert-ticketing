@@ -52,7 +52,8 @@ public class SecurityConstants {
         "/admin/",
         "/seats/admin/", // POST, PUT, DELETE
         "/concerts/admin/", // 콘서트 관리 전용 (/concert/admin, /concert/admin/8, /concert/admin/delete 등)
-        "/members/admin/"
+        "/members/admin/",
+        "/seat-grades/admin/"
     );
 
     /**

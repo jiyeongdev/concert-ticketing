@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 import com.sdemo1.common.utils.CacheInvalidationUtils;
 import com.sdemo1.common.utils.CacheKeyGenerator;
 import com.sdemo1.dto.seat.SeatGradeDto;
+import com.sdemo1.entity.Concert;
 import com.sdemo1.entity.SeatGrade;
+import com.sdemo1.repository.ConcertRepository;
 import com.sdemo1.repository.SeatGradeRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SeatGradeService {
 
     private final SeatGradeRepository seatGradeRepository;
+    private final ConcertRepository concertRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final CacheInvalidationUtils cacheInvalidationUtils;
 
@@ -155,6 +158,12 @@ public class SeatGradeService {
         SeatGrade seatGrade = new SeatGrade();
         seatGrade.setGradeName(seatGradeDto.gradeName());
         seatGrade.setPrice(seatGradeDto.price());
+        
+        // Concert 엔티티 조회 및 설정
+        Concert concert = concertRepository.findById(seatGradeDto.concertId())
+                .orElseThrow(() -> new RuntimeException("콘서트를 찾을 수 없습니다: " + seatGradeDto.concertId()));
+        seatGrade.setConcert(concert);
+        
         return seatGrade;
     }
 } 

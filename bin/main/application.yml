@@ -39,25 +39,6 @@ spring:
       enabled: true
       path: /h2-console
       
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${GOOGLE_REDIRECT_URI}
-            scope:
-              - email
-              - profile
-              - openid
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/auth
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-            user-name-attribute: sub
-
   config:
     import: optional:file:/app/config/dev-api.env
 
@@ -114,25 +95,6 @@ logging:
 #   allowed-origins:
 #     - http://localhost:3000
 
-# AWS 설정
-aws:
-  s3:
-    bucket: myrecipe-bucket
-    recipe-folder: recipe
-    region: ap-northeast-3
-
-# 스레드 풀 동적 설정
-thread-pool:
-  recipe-recommendation:
-    core-pool-size: ${RECIPE_CORE_POOL_SIZE:0}  # 기본값: CPU 코어의 절반
-    max-pool-size: ${RECIPE_MAX_POOL_SIZE:0}    # 기본값: CPU 코어 수
-    queue-capacity: ${RECIPE_QUEUE_CAPACITY:0} # 기본값: CPU 코어 * 5
-    keep-alive-seconds: ${RECIPE_KEEP_ALIVE:60} # 기본값: 60초
-  notification:
-    core-pool-size: ${NOTIFICATION_CORE_POOL_SIZE:0}  # 기본값: CPU 코어의 1/4
-    max-pool-size: ${NOTIFICATION_MAX_POOL_SIZE:0}    # 기본값: CPU 코어의 절반
-    queue-capacity: ${NOTIFICATION_QUEUE_CAPACITY:00} # 기본값: CPU 코어 * 2
-    keep-alive-seconds: ${NOTIFICATION_KEEP_ALIVE:30} # 기본값: 30초
 
 server:
   address: ${SERVER_ADDRESS:0.0.0.0}
