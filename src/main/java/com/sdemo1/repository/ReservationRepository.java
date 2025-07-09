@@ -45,4 +45,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, BigInt
      */
     @Query("SELECT r FROM Reservation r WHERE r.paymentStatus = 'PENDING'")
     List<Reservation> findPendingReservations();
+    
+    /**
+     * 콘서트의 예약된 좌석 ID 목록 조회
+     */
+    @Query("SELECT r.seat.id FROM Reservation r WHERE r.seat.concert.id = :concertId")
+    List<BigInteger> findReservedSeatIdsByConcertId(@Param("concertId") BigInteger concertId);
 } 

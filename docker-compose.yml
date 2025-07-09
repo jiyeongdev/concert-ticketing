@@ -1,39 +1,148 @@
 version: '3.8'
 
 services:
+  # MySQL 데이터베이스
   mysql:
     image: mysql:8.0
     container_name: concert-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: concert_db
-      MYSQL_USER: concert_user
-      MYSQL_PASSWORD: concert_pass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-belle3079!}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mydb}
+      MYSQL_USER: ${DB_USERNAME:-concert_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-concert_pass}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped
 
+  # RabbitMQ 메시지 큐
   rabbitmq:
     image: rabbitmq:3-management
     container_name: concert-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     ports:
-      - "5672:5672"   # AMQP 프로토콜
-      - "15672:15672" # 관리 UI
+      - "${RABBITMQ_AMQP_PORT:-5672}:5672"   # AMQP 프로토콜
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672" # 관리 UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped
 
+  # Redis 캐시
   redis:
     image: redis:7-alpine
     container_name: concert-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --notify-keyspace-events Ex
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped
+
+  # Spring Boot 애플리케이션
+  app:
+    build: .
+    container_name: concert-app
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      # 데이터베이스 설정
+      - DB_URL=${DB_URL:-jdbc:mysql://mysql:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+      - DB_USERNAME=${DB_USERNAME:-concert_user}
+      - DB_PASSWORD=${DB_PASSWORD:-concert_pass}
+      - DB_DRIVER=${DB_DRIVER:-com.mysql.cj.jdbc.Driver}
+      
+      # Redis 설정
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DATABASE=${REDIS_DATABASE:-0}
+      - REDIS_TIMEOUT=${REDIS_TIMEOUT:-2000ms}
+      
+      # RabbitMQ 설정
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - RABBITMQ_CONCURRENCY=${RABBITMQ_CONCURRENCY:-5}
+      - RABBITMQ_MAX_CONCURRENCY=${RABBITMQ_MAX_CONCURRENCY:-10}
+      - RABBITMQ_PREFETCH=${RABBITMQ_PREFETCH:-1}
+      - RABBITMQ_DEFAULT_REQUEUE_REJECTED=${RABBITMQ_DEFAULT_REQUEUE_REJECTED:-false}
+      
+      # JWT 설정
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-here-change-in-production}
+      
+      # Google OAuth 설정
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-http://localhost:8080/auth/google/callback}
+      
+      # 서버 설정
+      - SERVER_PORT=${SERVER_PORT:-8080}
+      - SERVER_ADDRESS=${SERVER_ADDRESS:-0.0.0.0}
+      - SERVER_SHUTDOWN=${SERVER_SHUTDOWN:-graceful}
+      - SERVER_ERROR_INCLUDE_MESSAGE=${SERVER_ERROR_INCLUDE_MESSAGE:-always}
+      - SERVER_ERROR_INCLUDE_BINDING_ERRORS=${SERVER_ERROR_INCLUDE_BINDING_ERRORS:-always}
+      - SERVER_ERROR_INCLUDE_STACKTRACE=${SERVER_ERROR_INCLUDE_STACKTRACE:-never}
+      - SERVER_ERROR_INCLUDE_EXCEPTION=${SERVER_ERROR_INCLUDE_EXCEPTION:-false}
+      - SERVER_MVC_THROW_EXCEPTION=${SERVER_MVC_THROW_EXCEPTION:-true}
+      - SERVER_WEB_RESOURCES_ADD_MAPPINGS=${SERVER_WEB_RESOURCES_ADD_MAPPINGS:-false}
+      
+      # 스레드 풀 설정
+      - RECIPE_CORE_POOL_SIZE=${RECIPE_CORE_POOL_SIZE:-0}
+      - RECIPE_MAX_POOL_SIZE=${RECIPE_MAX_POOL_SIZE:-0}
+      - RECIPE_QUEUE_CAPACITY=${RECIPE_QUEUE_CAPACITY:-0}
+      - RECIPE_KEEP_ALIVE=${RECIPE_KEEP_ALIVE:-60}
+      - NOTIFICATION_CORE_POOL_SIZE=${NOTIFICATION_CORE_POOL_SIZE:-0}
+      - NOTIFICATION_MAX_POOL_SIZE=${NOTIFICATION_MAX_POOL_SIZE:-0}
+      - NOTIFICATION_QUEUE_CAPACITY=${NOTIFICATION_QUEUE_CAPACITY:-0}
+      - NOTIFICATION_KEEP_ALIVE=${NOTIFICATION_KEEP_ALIVE:-30}
+      
+      # 대기열 설정
+      - QUEUE_EXCHANGE_WAITING=${QUEUE_EXCHANGE_WAITING:-concert.waiting.exchange}
+      - QUEUE_EXCHANGE_PROCESSING=${QUEUE_EXCHANGE_PROCESSING:-concert.processing.exchange}
+      - QUEUE_EXCHANGE_DEAD_LETTER=${QUEUE_EXCHANGE_DEAD_LETTER:-concert.dead.letter.exchange}
+      - QUEUE_WAITING_DEFAULT=${QUEUE_WAITING_DEFAULT:-concert.waiting.default}
+      - QUEUE_PROCESSING_DEFAULT=${QUEUE_PROCESSING_DEFAULT:-concert.processing.default}
+      - QUEUE_DEAD_LETTER=${QUEUE_DEAD_LETTER:-concert.dead.letter}
+      - QUEUE_ROUTING_KEY_PROCESSING=${QUEUE_ROUTING_KEY_PROCESSING:-processing}
+      - QUEUE_ROUTING_KEY_WAITING=${QUEUE_ROUTING_KEY_WAITING:-waiting}
+      - QUEUE_ROUTING_KEY_DEAD_LETTER=${QUEUE_ROUTING_KEY_DEAD_LETTER:-dead.letter}
+      - QUEUE_JOIN_START_HOURS=${QUEUE_JOIN_START_HOURS:-4}
+      - QUEUE_ENTRY_INTERVAL_SECONDS=${QUEUE_ENTRY_INTERVAL_SECONDS:-30}
+      - QUEUE_GROUP_SIZE=${QUEUE_GROUP_SIZE:-3}
+      - QUEUE_MAX_WAIT_TIME_MINUTES=${QUEUE_MAX_WAIT_TIME_MINUTES:-120}
+      - QUEUE_HOLD_DURATION_MINUTES=${QUEUE_HOLD_DURATION_MINUTES:-10}
+      - QUEUE_MAX_ESTIMATED_WAIT_TIME=${QUEUE_MAX_ESTIMATED_WAIT_TIME:-120}
+      - QUEUE_REDIS_TTL_WAITING_MINUTES=${QUEUE_REDIS_TTL_WAITING_MINUTES:-240}
+      - QUEUE_REDIS_TTL_READY_MINUTES=${QUEUE_REDIS_TTL_READY_MINUTES:-60}
+      - QUEUE_REDIS_TTL_ENTERED_MINUTES=${QUEUE_REDIS_TTL_ENTERED_MINUTES:-60}
+      
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./logs:/var/log
+    restart: unless-stopped
 
 volumes:
   mysql_data:

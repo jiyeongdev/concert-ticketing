@@ -1,75 +1,98 @@
 package com.sdemo1.controller;
 
+import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.stream.Collectors;
+import com.sdemo1.common.response.ApiResponse;
+import com.sdemo1.entity.Member;
+import com.sdemo1.response.MemberResponse;
+import com.sdemo1.service.MemberService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.http.HttpStatus;
-import com.sdemo1.common.response.ApiResponse;
-import com.sdemo1.request.MemberProfileRequest;
-import com.sdemo1.response.MemberResponse;
-import com.sdemo1.repository.MemberRepository;
-import com.sdemo1.entity.Member;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
-@RequestMapping("/member")
+@RequestMapping("/members")
+@RequiredArgsConstructor
+@Tag(name = "6. 회원 관리", description = "회원 정보 조회, 프로필 수정 API")
 public class MemberController {
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
-    public MemberController(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
-
-    @GetMapping("/info")
-    public ApiResponse<MemberResponse> getMember() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String memberId = auth.getName();
-        
-        Optional<Member> memberOptional = memberRepository.findById(new java.math.BigInteger(memberId));
-        if (!memberOptional.isPresent()) {
-            return new ApiResponse<>("사용자를 찾을 수 없습니다.", null, HttpStatus.NOT_FOUND);
-        }
-        Member member = memberOptional.get();
-        
-        MemberResponse response = MemberResponse.builder()
-            .memberId(member.getMemberId().longValue())
-            .role(auth.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""))
-            .name(member.getName())
-            .phone(member.getPhone())
-            .build();
-        
-        return new ApiResponse<>("사용자 정보 조회 성공", response, HttpStatus.OK);
-    }
-
-    @PostMapping("/profile")
-    public ApiResponse<MemberResponse> updateMember(@RequestBody MemberProfileRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String memberId = auth.getName();
-
-        Optional<Member> memberOptional = memberRepository.findById(new java.math.BigInteger(memberId));
-        if (!memberOptional.isPresent()) {
-            return new ApiResponse<>("사용자를 찾을 수 없습니다.", null, HttpStatus.NOT_FOUND);
-        }
-        Member member = memberOptional.get();
-
-        // 전화번호에서 숫자 이외의 문자(특수문자, 공백 등)를 모두 제거합니다.
-        String sanitizedPhone = request.getPhone().replaceAll("[^\\d]", "");
-
-        // 전화번호 중복 체크 (현재 사용자의 전화번호가 아닌 경우에만 체크)
-        if (!sanitizedPhone.equals(member.getPhone())) {
-            if (memberRepository.findByPhone(sanitizedPhone).isPresent()) {
-                return new ApiResponse<>("이미 사용 중인 전화번호입니다.", null, HttpStatus.CONFLICT);
+    /**
+     * 현재 로그인한 사용자 정보 조회
+     */
+    @GetMapping("/profile")
+    @Operation(summary = "회원 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다")
+    public ResponseEntity<ApiResponse<MemberResponse>> getMemberProfile() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String memberIdStr = auth.getName();
+            BigInteger memberId = new BigInteger(memberIdStr);
+            
+            Optional<Member> memberOptional = memberService.findOneById(memberId);
+            if (memberOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>("사용자를 찾을 수 없습니다.", null, HttpStatus.NOT_FOUND));
             }
+            
+            Member member = memberOptional.get();
+            
+            MemberResponse response = MemberResponse.builder()
+                .memberId(member.getMemberId().longValue())
+                .email(member.getEmail())
+                .name(member.getName())
+                .phone(member.getPhone())
+                .role(member.getRole().name())
+                .build();
+            
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>("사용자 정보 조회 성공", response, HttpStatus.OK));
+        } catch (Exception e) {
+            log.error("회원 정보 조회 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("회원 정보 조회 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
         }
+    }
 
-        member.setName(request.getName());
-        member.setPhone(sanitizedPhone);
-        memberRepository.save(member);
-        return new ApiResponse<>("사용자 정보 업데이트 성공", null, HttpStatus.OK);
+    /**
+     * 모든 회원 조회 (ADMIN만 접근 가능)
+     */
+    @GetMapping("/admin/all")
+    @Operation(summary = "전체 회원 조회", description = "모든 회원의 정보를 조회합니다 (관리자 전용)")
+
+    public ResponseEntity<ApiResponse<List<MemberResponse>>> getAllMembers() {
+        try {
+            log.info("=== 전체 회원 조회 API 호출 ===");
+            
+            List<Member> members = memberService.findMembers();
+            
+            List<MemberResponse> memberResponses = members.stream()
+                    .<MemberResponse>map(member -> MemberResponse.builder()
+                        .memberId(member.getMemberId().longValue())
+                        .email(member.getEmail())
+                        .name(member.getName())
+                        .phone(member.getPhone())
+                        .role(member.getRole().name())
+                        .build())
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>("전체 회원 조회 성공", memberResponses, HttpStatus.OK));
+        } catch (Exception e) {
+            log.error("전체 회원 조회 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("전체 회원 조회 실패: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR));
+        }
     }
 } 

@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,14 +28,16 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/seat-grades")
 @RequiredArgsConstructor
+@Tag(name = "8. 좌석 등급 관리", description = "좌석 등급 조회, 생성, 수정, 삭제 API")
 public class SeatGradeController {
 
     private final SeatGradeService seatGradeService;
 
     /**
-     * 콘서트별 좌석등급 조회
+     * 콘서트별 좌석등급 조회 (인증 필요)
      */
     @GetMapping("/concert/{concertId}")
+    @Operation(summary = "콘서트별 좌석등급 조회", description = "특정 콘서트의 모든 좌석등급 정보를 조회합니다 (인증 필요)")
     public ResponseEntity<ApiResponse<?>> getSeatGradesByConcertId(@PathVariable("concertId") BigInteger concertId) {
         try {
             log.info("=== 콘서트별 좌석등급 조회 API 호출: {} ===", concertId);
@@ -50,9 +54,10 @@ public class SeatGradeController {
     }
 
     /**
-     * 좌석등급 상세 조회
+     * 좌석등급 상세 조회 (인증 필요)
      */
     @GetMapping("/{id}")
+    @Operation(summary = "좌석등급 상세 조회", description = "특정 좌석등급의 상세 정보를 조회합니다 (인증 필요)")
     public ResponseEntity<ApiResponse<?>> getSeatGradeById(@PathVariable("id") BigInteger id) {
         try {
             log.info("=== 좌석등급 상세 조회 API 호출: {} ===", id);
@@ -72,6 +77,7 @@ public class SeatGradeController {
      * 좌석등급 생성 (ADMIN만 접근 가능)
      */
     @PostMapping
+    @Operation(summary = "좌석등급 생성", description = "새로운 좌석등급을 생성합니다 (ADMIN 권한 필요)")
     public ResponseEntity<ApiResponse<?>> createSeatGrade(@Valid @RequestBody SeatGradeDto seatGradeDto) {
         try {
             checkAdminRole();
@@ -94,6 +100,7 @@ public class SeatGradeController {
      * 좌석등급 수정 (ADMIN만 접근 가능)
      */
     @PutMapping("/{id}")
+    @Operation(summary = "좌석등급 수정", description = "특정 좌석등급 정보를 수정합니다 (ADMIN 권한 필요)")
     public ResponseEntity<ApiResponse<?>> updateSeatGrade(@PathVariable("id") BigInteger id, @Valid @RequestBody SeatGradeDto seatGradeDto) {
         try {
             checkAdminRole();
@@ -118,6 +125,7 @@ public class SeatGradeController {
      * 좌석등급 삭제 (ADMIN만 접근 가능)
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "좌석등급 삭제", description = "특정 좌석등급을 삭제합니다 (ADMIN 권한 필요)")
     public ResponseEntity<ApiResponse<?>> deleteSeatGrade(@PathVariable("id") BigInteger id) {
         try {
             checkAdminRole();

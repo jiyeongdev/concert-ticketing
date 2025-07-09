@@ -31,7 +31,15 @@ public class ConcertService {
     public List<ConcertDto> getAllConcerts() {
         String cacheKey = CacheKeyGenerator.getAllConcertsKey();
         
-        List<ConcertDto> concerts = (List<ConcertDto>) redisTemplate.opsForValue().get(cacheKey);
+        List<ConcertDto> concerts = null;
+        try {
+            concerts = (List<ConcertDto>) redisTemplate.opsForValue().get(cacheKey);
+        } catch (Exception e) {
+            log.warn("=== 콘서트 캐시 읽기 실패, DB 조회로 대체: {} ===", e.getMessage());
+            // 캐시 읽기 실패 시 해당 키 삭제
+            redisTemplate.delete(cacheKey);
+        }
+        
         if (concerts == null) {
             log.info("=== 모든 콘서트 조회 (DB) ===");
             concerts = concertRepository.findAllByOrderByConcertDateAsc()
@@ -39,8 +47,12 @@ public class ConcertService {
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
             
-            redisTemplate.opsForValue().set(cacheKey, concerts, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
-            log.info("=== 콘서트 캐시 저장: {} ===", cacheKey);
+            try {
+                redisTemplate.opsForValue().set(cacheKey, concerts, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+                log.info("=== 콘서트 캐시 저장: {} ===", cacheKey);
+            } catch (Exception e) {
+                log.warn("=== 콘서트 캐시 저장 실패: {} ===", e.getMessage());
+            }
         } else {
             log.info("=== 모든 콘서트 조회 (캐시) ===");
         }
@@ -54,15 +66,26 @@ public class ConcertService {
     public ConcertDto getConcertById(BigInteger id) {
         String cacheKey = CacheKeyGenerator.getConcertByIdKey(id);
         
-        ConcertDto concert = (ConcertDto) redisTemplate.opsForValue().get(cacheKey);
+        ConcertDto concert = null;
+        try {
+            concert = (ConcertDto) redisTemplate.opsForValue().get(cacheKey);
+        } catch (Exception e) {
+            log.warn("=== 콘서트 캐시 읽기 실패, DB 조회로 대체: {} ===", e.getMessage());
+            redisTemplate.delete(cacheKey);
+        }
+        
         if (concert == null) {
             log.info("=== 콘서트 조회 (DB): {} ===", id);
             Concert concertEntity = concertRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("콘서트를 찾을 수 없습니다: " + id));
             concert = convertToDto(concertEntity);
             
-            redisTemplate.opsForValue().set(cacheKey, concert, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
-            log.info("=== 콘서트 캐시 저장: {} ===", cacheKey);
+            try {
+                redisTemplate.opsForValue().set(cacheKey, concert, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+                log.info("=== 콘서트 캐시 저장: {} ===", cacheKey);
+            } catch (Exception e) {
+                log.warn("=== 콘서트 캐시 저장 실패: {} ===", e.getMessage());
+            }
         } else {
             log.info("=== 콘서트 조회 (캐시): {} ===", id);
         }
@@ -76,7 +99,14 @@ public class ConcertService {
     public List<ConcertDto> searchConcertsByTitle(String title) {
         String cacheKey = CacheKeyGenerator.getConcertSearchKey(title);
         
-        List<ConcertDto> concerts = (List<ConcertDto>) redisTemplate.opsForValue().get(cacheKey);
+        List<ConcertDto> concerts = null;
+        try {
+            concerts = (List<ConcertDto>) redisTemplate.opsForValue().get(cacheKey);
+        } catch (Exception e) {
+            log.warn("=== 콘서트 검색 캐시 읽기 실패, DB 조회로 대체: {} ===", e.getMessage());
+            redisTemplate.delete(cacheKey);
+        }
+        
         if (concerts == null) {
             log.info("=== 콘서트 제목 검색 (DB): {} ===", title);
             concerts = concertRepository.findByTitleContainingIgnoreCase(title)
@@ -84,8 +114,12 @@ public class ConcertService {
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
             
-            redisTemplate.opsForValue().set(cacheKey, concerts, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
-            log.info("=== 콘서트 검색 캐시 저장: {} ===", cacheKey);
+            try {
+                redisTemplate.opsForValue().set(cacheKey, concerts, CacheKeyGenerator.CONCERT_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+                log.info("=== 콘서트 검색 캐시 저장: {} ===", cacheKey);
+            } catch (Exception e) {
+                log.warn("=== 콘서트 검색 캐시 저장 실패: {} ===", e.getMessage());
+            }
         } else {
             log.info("=== 콘서트 제목 검색 (캐시): {} ===", title);
         }

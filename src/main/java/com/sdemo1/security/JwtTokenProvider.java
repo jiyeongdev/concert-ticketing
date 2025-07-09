@@ -224,25 +224,20 @@ public class JwtTokenProvider {
 
     /**
      * Claims에서 "role" 키 사용해서,
-     * 
      * JWT 토큰의 클레임(claims)에서 사용자의 권한 정보를 추출
      * Spring Security의 GrantedAuthority 형태로 변환
      */
     private Collection<? extends GrantedAuthority> getAuthoritiesFromClaims(Claims claims) {
         try {
-            // 1. "role" 키에서 권한 정보를 가져옴
             String auth = claims.get("role", String.class);
-
-            // 2. 권한이 없으면 기본값 "ROLE_USER" 부여
             if (auth == null || auth.isEmpty()) {
                 return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
             }
-            // 3. 권한 문자열을 쉼표(,)로 분리하고 각각을 GrantedAuthority로 변환
             return Arrays.stream(auth.split(","))
+                    .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            // 4. 에러 발생 시 기본 권한 부여
             log.error("권한 정보 추출 중 오류 발생: {}", e.getMessage());
             return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
         }

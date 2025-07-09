@@ -2,6 +2,7 @@ package com.sdemo1.controller;
 
 import java.math.BigInteger;
 import com.sdemo1.common.response.ApiResponse;
+import com.sdemo1.config.SwaggerExamples;
 import com.sdemo1.request.PaymentRequest;
 import com.sdemo1.security.CustomUserDetails;
 import com.sdemo1.service.PaymentCancelService;
@@ -17,6 +18,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/reservation")
 @RequiredArgsConstructor
+@Tag(name = "5. 예매/결제 관리", description = "결제 처리, 결제 취소 API")
 public class ReservationController {
 
     private final PaymentService paymentService;
@@ -34,6 +41,15 @@ public class ReservationController {
      * 결제 및 예매 확정
      */
     @PostMapping("/payment")
+    @Operation(summary = "결제 처리", description = "좌석 예매를 위한 결제를 처리하고 예매를 확정합니다",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.PAYMENT_REQUEST))))
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "결제 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.PAYMENT_SUCCESS))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "결제 실패",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.PAYMENT_FAILURE)))
+    })
     public ResponseEntity<ApiResponse<?>> processPayment(@Valid @RequestBody PaymentRequest request) {
         try {
             BigInteger memberId = getCurrentMemberId();
@@ -77,6 +93,7 @@ public class ReservationController {
      * 결제 취소
      */
     @DeleteMapping("/payment/{paymentId}")
+    @Operation(summary = "결제 취소", description = "완료된 결제를 취소하고 예매를 해제합니다")
     public ResponseEntity<ApiResponse<?>> cancelPayment(@PathVariable("paymentId") BigInteger paymentId,
                                                       @RequestParam("reason") String reason) {
         try {

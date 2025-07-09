@@ -2,6 +2,7 @@ package com.sdemo1.controller;
 
 import java.math.BigInteger;
 import com.sdemo1.common.response.ApiResponse;
+import com.sdemo1.config.SwaggerExamples;
 import com.sdemo1.request.JoinQueueRequest;
 import com.sdemo1.response.QueueStatusResponse;
 import com.sdemo1.security.CustomUserDetails;
@@ -17,6 +18,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/waiting-room")
 @RequiredArgsConstructor
+@Tag(name = "3. 대기열 관리", description = "대기열 입장/퇴장, 상태 조회 API")
 public class EnhancedWaitingQueueController {
 
     private final EnhancedWaitingQueueService enhancedWaitingQueueService;
@@ -37,6 +44,15 @@ public class EnhancedWaitingQueueController {
      * POST /v2/waiting-room/enter
      */
     @PostMapping("/enter")
+    @Operation(summary = "대기열 입장", description = "콘서트 예매 대기열에 입장합니다 (예매 10분 전부터 가능)",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.QUEUE_ENTER_REQUEST))))
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "대기열 입장 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.QUEUE_ENTER_RESPONSE))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.ERROR_INTERNAL_SERVER)))
+    })
     public ResponseEntity<ApiResponse<?>> enterWaitingRoom(@Valid @RequestBody JoinQueueRequest request) {
         try {
             BigInteger memberId = getCurrentMemberId();
@@ -66,6 +82,11 @@ public class EnhancedWaitingQueueController {
      * GET /v2/waiting-room/status/{concertId}
      */
     @GetMapping("/status/{concertId}")
+    @Operation(summary = "대기열 상태 조회", description = "현재 대기열 상태와 예상 대기 시간을 조회합니다")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "대기열 상태 조회 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.QUEUE_STATUS_RESPONSE)))
+    })
     public ResponseEntity<ApiResponse<?>> getWaitingRoomStatus(@PathVariable("concertId") BigInteger concertId) {
         try {
             BigInteger memberId = getCurrentMemberId();
@@ -95,6 +116,7 @@ public class EnhancedWaitingQueueController {
      * POST /v2/waiting-room/exit/{concertId}
      */
     @PostMapping("/exit/{concertId}")
+    @Operation(summary = "대기열 퇴장", description = "대기열에서 나가고 예매 자격을 포기합니다")
     public ResponseEntity<ApiResponse<?>> leaveWaitingRoom(@PathVariable("concertId") BigInteger concertId) {
         try {
             BigInteger memberId = getCurrentMemberId();

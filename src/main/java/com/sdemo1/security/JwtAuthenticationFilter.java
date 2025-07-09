@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sdemo1.config.SecurityConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -31,20 +32,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        // JWT 토큰이 필요하지 않은 경로들
-        return path.startsWith("/auth/") ||
-               path.equals("/health-check");
+        
+        // SecurityConstants를 사용하여 공개 경로 확인
+        boolean isPublicPath = SecurityConstants.isPublicPath(path);
+        return isPublicPath;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        log.info("=== JwtAuthenticationFilter.doFilterInternal() 호출 ===");
+        log.info("요청 URI: {}, Method: {}", request.getRequestURI(), request.getMethod());
+        
         try {
             String token = getJwtFromRequest(request);
             
             if (token == null) {
-                log.debug("토큰이 없습니다. 다음 필터로 진행합니다.");
-                filterChain.doFilter(request, response);
+                log.debug("토큰이 없습니다. 인증 실패로 처리합니다.");
+                String errorDetail = "JWT 토큰이 필요합니다";
+                handleErrorResponse(response, HttpStatus.UNAUTHORIZED, errorDetail);
                 return;
             }
             
@@ -58,7 +64,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Authentication authentication = jwtTokenProvider.validateAndGetAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("인증 정보가 SecurityContext에 저장되었습니다: {}", authentication);
+                log.info("=== JWT 인증 성공 ===");
+                log.info("사용자: {}", authentication.getName());
+                log.info("권한: {}", authentication.getAuthorities());
+                log.info("인증 정보가 SecurityContext에 저장되었습니다: {}", authentication);
             } catch (Exception e) {
                 log.warn("유효하지 않은 JWT 토큰입니다");
                 String errorDetail = String.format("JWT 토큰 검증 실패: %s", e.getMessage());

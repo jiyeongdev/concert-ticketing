@@ -12,6 +12,7 @@ import com.sdemo1.entity.Concert;
 import com.sdemo1.entity.Seat;
 import com.sdemo1.entity.SeatGrade;
 import com.sdemo1.repository.ConcertRepository;
+import com.sdemo1.repository.ReservationRepository;
 import com.sdemo1.repository.SeatGradeRepository;
 import com.sdemo1.repository.SeatRepository;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,6 +32,7 @@ public class SeatService {
     private final ConcertRepository concertRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final CacheInvalidationUtils cacheInvalidationUtils;
+    private final ReservationRepository reservationRepository;
 
     /**
      * 콘서트의 모든 좌석 조회 (Redis 캐시 적용)
@@ -256,6 +258,10 @@ public class SeatService {
     public List<SeatDto> updateSeatsByConcert(BigInteger concertId, List<SeatDto> seatDtos) {
         log.info("=== 콘서트별 좌석 수정: {} - {}개 ===", concertId, seatDtos.size());
         
+        // 콘서트 존재 여부 확인
+        Concert concert = concertRepository.findById(concertId)
+                .orElseThrow(() -> new RuntimeException("콘서트를 찾을 수 없습니다: " + concertId));
+        
         // 기존 좌석 삭제
         seatRepository.deleteByConcertId(concertId);
         
@@ -276,13 +282,26 @@ public class SeatService {
 
     /**
      * 콘서트의 모든 좌석 삭제 (Redis 캐시 무효화)
+     * 예약이 있는 좌석은 삭제하지 않음
      */
     public void deleteSeatsByConcert(BigInteger concertId) {
         log.info("=== 콘서트별 좌석 삭제: {} ===", concertId);
+        
+        // 예약이 있는 좌석 ID 목록 조회
+        List<BigInteger> reservedSeatIds = reservationRepository.findReservedSeatIdsByConcertId(concertId);
+        
+        if (!reservedSeatIds.isEmpty()) {
+            log.warn("예약이 있는 좌석이 있어 삭제를 건너뜁니다. 예약된 좌석 수: {}", reservedSeatIds.size());
+            throw new RuntimeException("예약이 있는 좌석이 있어 삭제할 수 없습니다. 예약된 좌석 수: " + reservedSeatIds.size());
+        }
+        
+        // 예약이 없는 좌석만 삭제
         seatRepository.deleteByConcertId(concertId);
         
         // 관련 캐시 무효화
         cacheInvalidationUtils.invalidateSeatCaches(concertId);
+        
+        log.info("=== 콘서트별 좌석 삭제 완료: {} ===", concertId);
     }
 
     /**

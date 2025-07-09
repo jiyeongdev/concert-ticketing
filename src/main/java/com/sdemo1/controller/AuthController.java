@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.config.RefreshTokenCookieConfig;
+import com.sdemo1.config.SwaggerExamples;
 import com.sdemo1.entity.Member;
 import com.sdemo1.repository.MemberRepository;
 import com.sdemo1.request.LoginRequest;
@@ -23,6 +24,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "1. 인증 관리", description = "회원가입, 로그인, 토큰 갱신, 로그아웃 API")
 public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -41,8 +48,17 @@ public class AuthController {
 
     /**
      * 회원가입
-     */
+     */ 
     @PostMapping("/signup")
+    @Operation(summary = "회원가입", description = "새로운 사용자 회원가입",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.SIGNUP_REQUEST))))
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원가입 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.SIGNUP_RESPONSE_SUCCESS))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "이미 존재하는 이메일",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.SIGNUP_RESPONSE_ERROR)))
+    })
     public ResponseEntity<ApiResponse<?>> signup(@Valid @RequestBody SignupRequest request) {
         try {
             log.info("=== 회원가입 시작 ===");
@@ -103,6 +119,15 @@ public class AuthController {
      * 로그인
      */
     @PostMapping("/login")
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하여 JWT 토큰 발급",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.LOGIN_REQUEST))))
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.LOGIN_RESPONSE_SUCCESS))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인 실패",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.LOGIN_RESPONSE_ERROR)))
+    })
     public ResponseEntity<ApiResponse<?>> login(@Valid @RequestBody LoginRequest request) {
         try {
             log.info("=== 로그인 시작 ===");
@@ -160,6 +185,7 @@ public class AuthController {
      * 토큰 갱신
      */
     @PostMapping("/refresh")
+    @Operation(summary = "토큰 갱신", description = "Refresh Token을 사용하여 새로운 Access Token 발급")
     public ResponseEntity<ApiResponse<?>> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
         try {
             log.info("=== 토큰 재발급 시작 ===");
@@ -213,6 +239,7 @@ public class AuthController {
      * 로그아웃
      */
     @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "Refresh Token 쿠키 삭제로 로그아웃 처리")
     public ResponseEntity<ApiResponse<?>> logout() {
         try {
             log.info("=== 로그아웃 시작 ===");

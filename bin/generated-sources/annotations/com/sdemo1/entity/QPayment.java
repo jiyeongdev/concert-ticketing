@@ -24,6 +24,8 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public final NumberPath<Integer> amount = createNumber("amount", Integer.class);
 
+    public final NumberPath<Integer> attemptNumber = createNumber("attemptNumber", Integer.class);
+
     public final NumberPath<java.math.BigInteger> id = createNumber("id", java.math.BigInteger.class);
 
     public final DateTimePath<java.time.LocalDateTime> paidAt = createDateTime("paidAt", java.time.LocalDateTime.class);

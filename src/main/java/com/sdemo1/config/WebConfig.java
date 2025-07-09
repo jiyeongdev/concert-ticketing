@@ -1,6 +1,5 @@
 package com.sdemo1.config;
 
-import com.sdemo1.interceptor.AuthenticationInterceptor;
 import com.sdemo1.interceptor.LoggingInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 public class WebConfig implements WebMvcConfigurer {
 
     private final LoggingInterceptor loggingInterceptor;
-    private final AuthenticationInterceptor authenticationInterceptor;
 
     // @Override
     // public void addCorsMappings(CorsRegistry registry) {
@@ -29,20 +27,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 로깅 인터셉터 등록
+        // 로깅 인터셉터만 등록 (인증은 Spring Security만 사용)
         registry.addInterceptor(loggingInterceptor)
                 .addPathPatterns("/**")  // 모든 경로에 대해 로깅
                 .excludePathPatterns("/static/**", "/error");  // 특정 경로는 제외
-        
-        // 인증 인터셉터 등록
-        registry.addInterceptor(authenticationInterceptor)
-                .addPathPatterns("/**")  // 모든 경로에 대해 인증 체크
-                .excludePathPatterns(
-                    "/auth/**",      // 인증 관련 경로 제외
-                    "/health-check",    // 헬스체크 제외
-                    "/static/**",       // 정적 리소스 제외
-                    "/error"            // 에러 페이지 제외
-                );
     }
 
     @Override

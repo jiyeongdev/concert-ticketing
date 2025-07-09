@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.common.utils.BookingEligibilityChecker;
+import com.sdemo1.config.SwaggerExamples;
 import com.sdemo1.dto.seat.SeatHoldResult;
 import com.sdemo1.dto.seat.SeatStatusDto;
 import com.sdemo1.response.QueueStatusResponse;
@@ -21,6 +22,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/booking")
 @RequiredArgsConstructor
+@Tag(name = "4. 예매 관리", description = "예매 토큰 발급, 좌석 점유/해제, 실시간 좌석 상태 조회 API")
 public class BookingController {
 
     private final SeatStatusService seatStatusService;
@@ -43,6 +50,13 @@ public class BookingController {
      * 예매 토큰 발급 (예매 페이지 입장)
      */
     @PostMapping("/token/{concertId}")
+    @Operation(summary = "예매 토큰 발급", description = "대기열 입장 후 예매 자격을 확인하고 예매 토큰을 발급합니다")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "예매 토큰 발급 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.BOOKING_TOKEN_RESPONSE))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "예매 자격 없음",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.ERROR_FORBIDDEN)))
+    })
     public ResponseEntity<ApiResponse<?>> getBookingToken(@PathVariable("concertId") BigInteger concertId) {
         try {
             BigInteger memberId = getCurrentMemberId();
@@ -68,6 +82,11 @@ public class BookingController {
      * 초기 로딩 시 실시간 좌석 상태 조회 (REST API)
      */
     @GetMapping("/{concertId}/seats")
+    @Operation(summary = "좌석 상태 조회", description = "콘서트의 모든 좌석 상태를 조회합니다")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "좌석 상태 조회 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.SEAT_STATUS_RESPONSE)))
+    })
     public ResponseEntity<?> getSeatStatus(@PathVariable("concertId") BigInteger concertId) {
         BigInteger memberId = getCurrentMemberId();
         log.info("실시간 좌석 상태 조회 (REST): concertId={}, memberId={}", concertId, memberId);
@@ -94,6 +113,13 @@ public class BookingController {
      * 좌석 점유 요청 (REST API)
      */
     @PostMapping("/{concertId}/seats/{seatId}/hold")
+    @Operation(summary = "좌석 점유", description = "특정 좌석을 점유합니다")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "좌석 점유 성공",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.SEAT_HOLD_SUCCESS))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "좌석 점유 실패",
+            content = @Content(examples = @ExampleObject(value = SwaggerExamples.SEAT_HOLD_FAILURE)))
+    })
     public ResponseEntity<?> holdSeat(@PathVariable("concertId") BigInteger concertId, 
                                      @PathVariable("seatId") BigInteger seatId) {
         BigInteger memberId = getCurrentMemberId();
@@ -120,6 +146,7 @@ public class BookingController {
      * 좌석 해제 요청 (REST API)
      */
     @DeleteMapping("/{concertId}/seats/{seatId}/hold")
+    @Operation(summary = "좌석 해제", description = "점유한 좌석을 해제합니다")
     public ResponseEntity<?> releaseSeat(@PathVariable("concertId") BigInteger concertId,
                                         @PathVariable("seatId") BigInteger seatId) {
         BigInteger memberId = getCurrentMemberId();
