@@ -23,6 +23,6 @@ build/
 ~/Library/Application Support/Code/
 
 # Environment variables
-.env
-.env.*
+!.env
+!.env.*
 !.env.example

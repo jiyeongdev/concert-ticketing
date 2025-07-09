@@ -53,45 +53,18 @@ cd concert-reservation
 
 ```bash
 # 환경변수 파일 생성
-.env 포함됨
+로컬용 API 이므로 .env 까지 커밋.
 ```
 
 ### 4. 애플리케이션 실행
 
-> ⚠️ **중요**: 프로젝트를 처음 실행하거나 안정적으로 실행하려면 아래 방법 중 하나를 선택하세요!
+> ⚠️ **중요**: 프로젝트를 실행 가이드
 
-#### 🎯 방법 1: 한번에 모든 서비스 실행 (⭐ 가장 추천)
+#### 🎯 한번에 모든 서비스 실행 (⭐ 가장 추천)
 
 ```bash
 # 모든 서비스 자동 빌드 및 시작 (MySQL, Redis, RabbitMQ, Spring Boot)
 ./start.sh
-```
-**✅ 이 방법이 가장 안전하고 확실합니다!**
-
-#### 🔧 방법 2: 단계별 실행
-
-```bash
-# 앱만 빌드
-docker-compose build app
-
-# 모든 서비스 실행
-docker-compose up -d
-
-# 로그 확인
-docker-compose logs -f app
-```
-
-#### ⚙️ 방법 3: 특정 서비스만 먼저 실행
-
-```bash
-# 의존성 서비스 먼저 시작
-docker-compose up mysql redis rabbitmq -d
-
-# 앱 빌드
-docker-compose build app
-
-# 앱 실행
-docker-compose up app -d
 ```
 
 #### 🛑 서비스 중지
@@ -116,6 +89,10 @@ docker-compose down
 | **RabbitMQ 관리** | http://localhost:15672 | 메시지 큐 관리 (guest/guest) |
 | **MySQL** | localhost:3306 | 데이터베이스 (concert_user/concert_pass) |
 | **Redis** | localhost:6379 | 캐시 서버 |
+
+## WebSocket Reservation Test Page
+
+- **WebSocket Reservation Test Page**: [websocket-reservation.html](src/main/resources/static/websocket-reservation.html) - 웹소켓을 통해 실시간 좌석 예약 기능을 테스트할 수 있는 HTML 페이지입니다. 상단의 input
 
 ## 📖 API 문서
 
@@ -175,3 +152,4 @@ docker-compose logs --tail=100 app
 ## 📞 문의
 
 jiyeong.dev@gmail.com
+

@@ -195,8 +195,8 @@ public class EnhancedWaitingQueueService {
         redisQueueService.removeTopWaitingUsers(concertId, batchSize);
 
         // RabbitMQ에 메시지 발송 (순차 처리)
-        for (String userId : topUsers) {
-            BigInteger memberId = new BigInteger(userId);
+        for (String memberIdStr : topUsers) {
+            BigInteger memberId = new BigInteger(memberIdStr);
             rabbitMQService.sendToProcessingQueue(memberId, concertId, concert.getTitle());
             log.info("예매 입장 메시지 발송: memberId={}, concertId={}", memberId, concertId);
         }

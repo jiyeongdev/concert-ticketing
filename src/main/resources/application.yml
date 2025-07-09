@@ -22,25 +22,26 @@ spring:
     password: ${DB_PASSWORD}
     connection-timeout: 10000 # 10초로 늘리기
   jpa:
-    show-sql: false
+    hibernate:
+      ddl-auto: none
+    show-sql: true
     properties:
       hibernate:
-        ddl-auto: update
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
-        use_sql_comments: false
+        use_sql_comments: true
         jdbc:
           time_zone: UTC
         types:
           java-time:
             jdbc-type: TIMESTAMP
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  # h2:
+    # console:
+      # enabled: false
+      # path: /h2-console
   
-  config:
-    import: optional:file:/app/config/dev-api.env
+  # config:
+    # import: optional:file:/app/config/dev-api.env
 
   # Redis 설정
   data:
@@ -57,6 +58,9 @@ spring:
           max-wait: -1
       # Redis Key Events 활성화
       notify-keyspace-events: "Ex"
+      # Redis Repository 비활성화
+      repositories:
+        enabled: false
 
   # RabbitMQ 설정
   rabbitmq:
@@ -116,6 +120,8 @@ server:
   web:
     resources:
       add-mappings: ${SERVER_WEB_RESOURCES_ADD_MAPPINGS:false}
+    content-type:
+      charset: UTF-8
 
 # Swagger/OpenAPI 설정
 springdoc:

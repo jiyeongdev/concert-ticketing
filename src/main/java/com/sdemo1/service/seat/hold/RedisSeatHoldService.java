@@ -472,7 +472,7 @@ public class RedisSeatHoldService {
             
             // 새로운 점유 정보 저장
             SeatHold seatHold = new SeatHold();
-            seatHold.setUser(member);
+            seatHold.setMember(member);
             seatHold.setSeat(seat);
             seatHold.setHoldExpireAt(expireAt);
             

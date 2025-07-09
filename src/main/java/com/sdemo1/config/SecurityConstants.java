@@ -18,6 +18,7 @@ public class SecurityConstants {
     public static final List<String> PUBLIC_PATHS = Arrays.asList(
         // 인증 관련
         "/auth/",
+        "/api/auth/",
         
         // 헬스 체크
         "/health-check",

@@ -24,8 +24,8 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, BigInteger> 
     /**
      * 특정 사용자의 모든 점유 좌석 조회
      */
-    @Query("SELECT sh FROM SeatHold sh WHERE sh.user.memberId = :userId AND sh.holdExpireAt > :now")
-    List<SeatHold> findByUserIdAndNotExpired(@Param("userId") BigInteger userId, @Param("now") LocalDateTime now);
+    @Query("SELECT sh FROM SeatHold sh WHERE sh.member.memberId = :memberId AND sh.holdExpireAt > :now")
+    List<SeatHold> findByMemberIdAndNotExpired(@Param("memberId") BigInteger memberId, @Param("now") LocalDateTime now);
 
     /**
      * 만료된 점유 정보 조회

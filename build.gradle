@@ -120,6 +120,10 @@ dependencies {
     
     // Swagger/OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    
+    // JSR-305 annotations (FindBugs) - 컴파일 경고 해결
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    annotationProcessor 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
 compileJava {
