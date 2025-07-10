@@ -42,42 +42,37 @@
 - **Docker Compose** (2.0+)
 - **Git**
 
-### 2. 프로젝트 클론
-
-```bash
-git clone <repository-url>
-cd concert-reservation
-```
-
-### 3. 환경 설정
+### 2. 환경 설정
 
 ```bash
 # 환경변수 파일 생성
 로컬용 API 이므로 .env 까지 커밋.
 ```
 
-### 4. 애플리케이션 실행
+### 3. 애플리케이션 환경 별 실행
 
 > ⚠️ **중요**: 프로젝트를 실행 가이드
+> 
 
-#### 🎯 한번에 모든 서비스 실행 (⭐ 가장 추천)
+#### 1. 도커 환경(배포/개발) 실행 (⭐ 가장 추천)
 
 ```bash
-# 모든 서비스 자동 빌드 및 시작 (MySQL, Redis, RabbitMQ, Spring Boot)
 ./start.sh
 ```
+- docker-compose로 모든 서비스가 실행됩니다.
+- Spring Boot는 application-dev.yml 설정이 자동 적용됩니다.
 
-#### 🛑 서비스 중지
+#### 2. 로컬 개발 환경 실행
+  ##### 모든 서비스 자동 빌드 및 시작 (MySQL, Redis, RabbitMQ, Spring Boot)
 
 ```bash
-# 모든 서비스 중지
-./stop.sh
-
-# 또는
-docker-compose down
+./gradlew bootRun --args='--spring.profiles.active=local'
 ```
+- application-local.yml의 설정이 적용됩니다.
+- DB/Redis/RabbitMQ는 로컬에서 직접 실행되어야 합니다.
 
-### 5. 서비스 접속
+
+### 4. 서비스 접속
 
 애플리케이션이 시작되면 다음 URL로 접속할 수 있습니다:
 
@@ -87,60 +82,68 @@ docker-compose down
 | **Swagger UI** | http://localhost:8080/swagger-ui.html | API 문서 및 테스트 |
 | **API Docs** | http://localhost:8080/v3/api-docs | OpenAPI 스펙 (JSON) |
 | **RabbitMQ 관리** | http://localhost:15672 | 메시지 큐 관리 (guest/guest) |
-| **MySQL** | localhost:3306 | 데이터베이스 (concert_user/concert_pass) |
+| **MySQL** | localhost:3306 | 데이터베이스 (root/admin1234) |
 | **Redis** | localhost:6379 | 캐시 서버 |
 
 ## WebSocket Reservation Test Page
 
-- **WebSocket Reservation Test Page**: [websocket-reservation.html](src/main/resources/static/websocket-reservation.html) - 웹소켓을 통해 실시간 좌석 예약 기능을 테스트할 수 있는 HTML 페이지입니다. 상단의 input
+- **WebSocket Reservation Test Page**: http://localhost:8080/websocket-reservation.html - 웹소켓을 통해 실시간 좌석 예약 기능을 테스트할 수 있는 HTML 페이지입니다.
 
-##  API 문서
 
-### Swagger UI 사용법
+## 콘서트 예매 대기열 시스템 - Redis와 RabbitMQ를 조합하여 대용량 처리를 지원합니다.
 
-1. 브라우저에서 http://localhost:8080/swagger-ui.html 접속
-2. 상단에서 API 태그별로 정리된 엔드포인트 확인
-3. 각 API를 클릭하여 상세 정보 확인
-4. **"Try it out"** 버튼으로 직접 API 테스트 가능
+## 🏗️ 시스템 아키텍처
 
-## 실행 방법
-
-### 1. 로컬 개발 환경 실행
-
-```bash
-./gradlew bootRun --args='--spring.profiles.active=local'
 ```
-- application-local.yml의 설정이 적용됩니다.
-- DB/Redis/RabbitMQ는 로컬에서 직접 실행되어야 합니다.
-
-### 2. 도커 환경(배포/개발) 실행
-
-```bash
-./start.sh
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Client App    │    │   Redis         │    │   RabbitMQ      │
+│                 │    │                 │    │                 │
+│ - 대기열 입장    │───▶│ - 대기열 관리    │    │ - 순차 처리      │
+│ - 상태 조회      │    │ - 순번 관리      │    │ - 메시지 큐     │
+│ - 토큰 발급      │    │ - 상태 관리      │    │ - 입장 처리     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
-- docker-compose로 모든 서비스가 실행됩니다.
-- Spring Boot는 application-dev.yml 설정이 자동 적용됩니다.
+
+## 🎟️ 콘서트 예매 대기열 시스템
+ - 대용량 트래픽을 위한 **Redis** + **RabbitMQ** 기반의 예매 대기열 시스템입니다.
+
+---
+
+### 주요 동작 및 엔드포인트
+
+| 단계 | 엔드포인트/동작                        | 설명                                   | 상태값                | 사용 기술           |
+|------|----------------------------------------|----------------------------------------|----------------------|--------------------|
+| 1    | POST /waiting-room/enter               | 대기열 입장, 순번/예상시간 계산         | WAITING              | Spring, Redis      |
+| 2    | GET /waiting-room/status/{concertId}   | 대기열 순번/상태/예상 대기시간 조회     | WAITING, READY, ENTERED | Spring, Redis      |
+| 3    | (내부 처리: RabbitMQ/Redis)            | 상위 N명 추출, 메시지 발송, READY로 변경 | READY                | Redis, RabbitMQ    |
+| 4    | POST /booking/token/{concertId}        | READY 확인 후 ENTERED로 변경, 토큰 발급  | ENTERED              | Spring, Redis      |
+
+---
+
+### 상태값 설명
+
+| 상태값   | 의미                        |
+|----------|-----------------------------|
+| WAITING  | 대기열에 입장, 대기 중       |
+| READY    | 예매 가능, N분 내 입장 가능   |
+| ENTERED  | 예매 페이지 입장 완료        |
+| (EXPIRED)| (선택) N분 내 미입장 시 만료 |
+
+---
+
+#### 예시 흐름
+
+1. **대기열 입장** → WAITING  
+2. **상태 조회** → WAITING / READY / ENTERED  
+3. **대기열 퇴장** (선택)  
+4. **예매 오픈** (내부적으로 READY로 변경)  
+5. **예매 토큰 발급** → ENTERED
+
+---
+
 
 
 ##  개발 및 관리
-
-### Docker 이미지 빌드 및 컨테이너 관리
-
-####  Docker 이미지 빌드
-
-```bash
-# 1. Spring Boot 애플리케이션 이미지 빌드
-docker-compose build app
-
-# 2. 캐시 무시하고 새로 빌드 (소스 변경 시)
-docker-compose build --no-cache app
-
-# 3. 모든 서비스 이미지 빌드
-docker-compose build
-
-# 4. 개별 이미지 직접 빌드
-docker build -t concert-reservation-app .
-```
 
 ####  생성되는 컨테이너 정보
 
