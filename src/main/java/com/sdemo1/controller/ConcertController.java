@@ -1,6 +1,5 @@
 package com.sdemo1.controller;
 
-import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.config.SwaggerExamples;
@@ -108,7 +107,7 @@ public class ConcertController {
      */
     @PutMapping("/admin/{id}")
     @Operation(summary = "콘서트 수정", description = "기존 콘서트 정보를 수정합니다 (ADMIN 권한 필요)")
-    public ResponseEntity<ApiResponse<?>> updateConcert(@PathVariable("id") BigInteger id, @Valid @RequestBody ConcertDto concertDto) {
+    public ResponseEntity<ApiResponse<?>> updateConcert(@PathVariable("id") Long id, @Valid @RequestBody ConcertDto concertDto) {
         try {
             log.info("=== 콘서트 수정 API 호출: {} ===", id);
             
@@ -128,7 +127,7 @@ public class ConcertController {
      */
     @DeleteMapping("/admin/{id}")
     @Operation(summary = "콘서트 삭제", description = "콘서트를 삭제합니다 (ADMIN 권한 필요)")
-    public ResponseEntity<ApiResponse<?>> deleteConcert(@PathVariable("id") BigInteger id) {
+    public ResponseEntity<ApiResponse<?>> deleteConcert(@PathVariable("id") Long id) {
         try {
             log.info("=== 콘서트 삭제 API 호출: {} ===", id);
             

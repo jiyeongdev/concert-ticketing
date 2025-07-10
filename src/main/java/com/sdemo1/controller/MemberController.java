@@ -1,6 +1,5 @@
 package com.sdemo1.controller;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,7 +37,7 @@ public class MemberController {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String memberIdStr = auth.getName();
-            BigInteger memberId = new BigInteger(memberIdStr);
+            Long memberId = Long.parseLong(memberIdStr);
             
             Optional<Member> memberOptional = memberService.findOneById(memberId);
             if (memberOptional.isEmpty()) {
@@ -49,7 +48,7 @@ public class MemberController {
             Member member = memberOptional.get();
             
             MemberResponse response = MemberResponse.builder()
-                .memberId(member.getMemberId().longValue())
+                .memberId(member.getMemberId())
                 .email(member.getEmail())
                 .name(member.getName())
                 .phone(member.getPhone())
@@ -79,7 +78,7 @@ public class MemberController {
             
             List<MemberResponse> memberResponses = members.stream()
                     .<MemberResponse>map(member -> MemberResponse.builder()
-                        .memberId(member.getMemberId().longValue())
+                        .memberId(member.getMemberId())
                         .email(member.getEmail())
                         .name(member.getName())
                         .phone(member.getPhone())

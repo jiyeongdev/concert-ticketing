@@ -1,6 +1,5 @@
 package com.sdemo1.controller.seat;
 
-import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.dto.seat.SeatGradeDto;
@@ -36,7 +35,7 @@ public class SeatGradeController {
      */
     @GetMapping("/admin/concert/{concertId}")
     @Operation(summary = "콘서트별 좌석등급 조회", description = "특정 콘서트의 모든 좌석등급 정보를 조회합니다 (인증 필요)")
-    public ResponseEntity<ApiResponse<?>> getSeatGradesByConcertId(@PathVariable("concertId") BigInteger concertId) {
+    public ResponseEntity<ApiResponse<?>> getSeatGradesByConcertId(@PathVariable("concertId") Long concertId) {
         try {
             log.info("=== 콘서트별 좌석등급 조회 API 호출: {} ===", concertId);
             
@@ -77,7 +76,7 @@ public class SeatGradeController {
      */
     @PutMapping("/admin/{id}")
     @Operation(summary = "좌석등급 수정", description = "특정 좌석등급 정보를 수정합니다 (ADMIN 권한 필요)")
-    public ResponseEntity<ApiResponse<?>> updateSeatGrade(@PathVariable("id") BigInteger id, @Valid @RequestBody SeatGradeDto seatGradeDto) {
+    public ResponseEntity<ApiResponse<?>> updateSeatGrade(@PathVariable("id") Long id, @Valid @RequestBody SeatGradeDto seatGradeDto) {
         try {
             SeatGradeDto updatedSeatGrade = seatGradeService.updateSeatGrade(id, seatGradeDto);
             
@@ -99,7 +98,7 @@ public class SeatGradeController {
      */
     @DeleteMapping("/admin/{id}")
     @Operation(summary = "좌석등급 삭제", description = "특정 좌석등급을 삭제합니다 (ADMIN 권한 필요)")
-    public ResponseEntity<ApiResponse<?>> deleteSeatGrade(@PathVariable("id") BigInteger id) {
+    public ResponseEntity<ApiResponse<?>> deleteSeatGrade(@PathVariable("id") Long id) {
         try {
             seatGradeService.deleteSeatGrade(id);
             

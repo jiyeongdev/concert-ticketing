@@ -1,6 +1,5 @@
 package com.sdemo1.service.seat.status;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdemo1.service.seat.websocket.WebSocketMessageService;
@@ -82,7 +81,7 @@ public class SeatStatusEventPublisher {
     /**
      * 좌석 점유 이벤트 발행
      */
-    public void publishSeatHold(BigInteger concertId, BigInteger seatId, BigInteger memberId, Long remainingTime) {
+    public void publishSeatHold(Long concertId, Long seatId, Long memberId, Long remainingTime) {
         SeatStatusEvent event = SeatStatusEvent.builder()
             .concertId(concertId)
             .seatId(seatId)
@@ -98,7 +97,7 @@ public class SeatStatusEventPublisher {
     /**
      * 좌석 해제 이벤트 발행
      */
-    public void publishSeatRelease(BigInteger concertId, BigInteger seatId) {
+    public void publishSeatRelease(Long concertId, Long seatId) {
         SeatStatusEvent event = SeatStatusEvent.builder()
             .concertId(concertId)
             .seatId(seatId)
@@ -114,7 +113,7 @@ public class SeatStatusEventPublisher {
     /**
      * 좌석 예매 확정 이벤트 발행
      */
-    public void publishSeatBooked(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    public void publishSeatBooked(Long concertId, Long seatId, Long memberId) {
         SeatStatusEvent event = SeatStatusEvent.builder()
             .concertId(concertId)
             .seatId(seatId)
@@ -130,7 +129,7 @@ public class SeatStatusEventPublisher {
     /**
      * 전체 좌석 상태 이벤트 발행
      */
-    public void publishAllSeatsStatus(BigInteger concertId, Object seatsData) {
+    public void publishAllSeatsStatus(Long concertId, Object seatsData) {
         String destination = "/topic/" + concertId.toString() + "/status";
         webSocketMessageService.broadcastMessage(destination, seatsData);
         log.info("전체 좌석 상태 이벤트 발행: concertId={}", concertId);
@@ -146,10 +145,10 @@ public class SeatStatusEventPublisher {
     @lombok.Data
     @lombok.Builder
     public static class SeatStatusEvent {
-        private BigInteger concertId;
-        private BigInteger seatId;
+        private Long concertId;
+        private Long seatId;
         private String status; // AVAILABLE, HELD, BOOKED
-        private BigInteger memberId;
+        private Long memberId;
         private Long remainingHoldTime; // 남은 점유 시간 (초)
         private LocalDateTime timestamp;
     }

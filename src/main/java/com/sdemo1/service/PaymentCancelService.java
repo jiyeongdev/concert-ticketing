@@ -1,6 +1,5 @@
 package com.sdemo1.service;
 
-import java.math.BigInteger;
 import com.sdemo1.entity.Payment;
 import com.sdemo1.entity.Reservation;
 import com.sdemo1.repository.PaymentRepository;
@@ -25,7 +24,7 @@ public class PaymentCancelService {
      * 결제 취소 처리
      */
     @Transactional
-    public CancelResult cancelPayment(BigInteger memberId, BigInteger paymentId, String reason) {
+    public CancelResult cancelPayment(Long memberId, Long paymentId, String reason) {
         try {
             log.info("결제 취소 요청: memberId={}, paymentId={}, reason={}", memberId, paymentId, reason);
             

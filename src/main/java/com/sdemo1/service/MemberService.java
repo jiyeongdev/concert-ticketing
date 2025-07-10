@@ -1,14 +1,11 @@
 package com.sdemo1.service;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.sdemo1.entity.Member;
 import com.sdemo1.repository.MemberRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -31,7 +28,7 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
-    public Optional<Member> findOneById(BigInteger memberId) {
+    public Optional<Member> findOneById(Long memberId) {
         return memberRepository.findById(memberId);
     }
 

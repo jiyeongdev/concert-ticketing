@@ -1,6 +1,5 @@
 package com.sdemo1.service.seat.status;
 
-import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.dto.seat.SeatStatusDto;
 import com.sdemo1.entity.Member;
@@ -23,7 +22,7 @@ public class SeatStatusService {
     /**
      * Redis 기반 좌석 상태 조회 (공통 로직)
      */
-    public List<SeatStatusDto> getSeatStatusFromRedis(BigInteger concertId) {   
+    public List<SeatStatusDto> getSeatStatusFromRedis(Long concertId) {   
         try {
             // DB에서 좌석 정보 조회 (SeatService를 통해)
             List<SeatStatusDto> dbSeats = getSeatStatusFromDatabase(concertId);
@@ -62,7 +61,7 @@ public class SeatStatusService {
     /**
      * DB에서 좌석 상태 조회
      */
-    private List<SeatStatusDto> getSeatStatusFromDatabase(BigInteger concertId) {
+    private List<SeatStatusDto> getSeatStatusFromDatabase(Long concertId) {
         return seatService.getSeatsByConcertId(concertId).stream()
             .map(seatDto -> SeatStatusDto.builder()
                 .id(seatDto.id())
@@ -84,7 +83,7 @@ public class SeatStatusService {
     /**
      * 사용자 이름 조회 (공통 로직)
      */
-    public String getMemberName(BigInteger memberId) {
+    public String getMemberName(Long memberId) {
         try {
             Member member = memberRepository.findById(memberId).orElse(null);
             return member != null ? member.getName() : "사용자_" + memberId;

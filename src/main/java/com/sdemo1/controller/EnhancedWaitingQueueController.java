@@ -1,6 +1,5 @@
 package com.sdemo1.controller;
 
-import java.math.BigInteger;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.config.SwaggerExamples;
 import com.sdemo1.request.JoinQueueRequest;
@@ -55,7 +54,7 @@ public class EnhancedWaitingQueueController {
     })
     public ResponseEntity<ApiResponse<?>> enterWaitingRoom(@Valid @RequestBody JoinQueueRequest request) {
         try {
-            BigInteger memberId = getCurrentMemberId();
+            Long memberId = getCurrentMemberId();
             log.info("=== 대기열 입장 API 호출: memberId={}, concertId={} ===", memberId, request.getConcertId());
             
             QueueStatusResponse result = enhancedWaitingQueueService.enterWaitingRoom(memberId, request);
@@ -87,9 +86,9 @@ public class EnhancedWaitingQueueController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "대기열 상태 조회 성공",
             content = @Content(examples = @ExampleObject(value = SwaggerExamples.QUEUE_STATUS_RESPONSE)))
     })
-    public ResponseEntity<ApiResponse<?>> getWaitingRoomStatus(@PathVariable("concertId") BigInteger concertId) {
+    public ResponseEntity<ApiResponse<?>> getWaitingRoomStatus(@PathVariable("concertId") Long concertId) {
         try {
-            BigInteger memberId = getCurrentMemberId();
+            Long memberId = getCurrentMemberId();
             log.info("=== 대기열 상태 조회 API 호출: memberId={}, concertId={} ===", memberId, concertId);
             
             QueueStatusResponse result = enhancedWaitingQueueService.getWaitingRoomStatus(memberId, concertId);
@@ -117,9 +116,9 @@ public class EnhancedWaitingQueueController {
      */
     @PostMapping("/exit/{concertId}")
     @Operation(summary = "대기열 퇴장", description = "대기열에서 나가고 예매 자격을 포기합니다")
-    public ResponseEntity<ApiResponse<?>> leaveWaitingRoom(@PathVariable("concertId") BigInteger concertId) {
+    public ResponseEntity<ApiResponse<?>> leaveWaitingRoom(@PathVariable("concertId") Long concertId) {
         try {
-            BigInteger memberId = getCurrentMemberId();
+            Long memberId = getCurrentMemberId();
             log.info("=== 대기열 나가기 API 호출: memberId={}, concertId={} ===", memberId, concertId);
             
             enhancedWaitingQueueService.leaveWaitingRoom(memberId, concertId);
@@ -140,7 +139,7 @@ public class EnhancedWaitingQueueController {
     /**
      * 현재 로그인한 사용자의 ID 조회
      */
-    private BigInteger getCurrentMemberId() {
+    private Long getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

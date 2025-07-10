@@ -1,6 +1,5 @@
 package com.sdemo1.dto.seat;
 
-import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SeatStatusDto {
-    private BigInteger id;
-    private BigInteger concertId;
-    private BigInteger seatGradeId;
+    private Long id;
+    private Long concertId;
+    private Long seatGradeId;
     private String seatRow;
     private String seatNumber;
     private Integer positionX;

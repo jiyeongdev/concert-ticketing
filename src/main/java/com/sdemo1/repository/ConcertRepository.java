@@ -1,13 +1,12 @@
 package com.sdemo1.repository;
 
-import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.entity.Concert;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ConcertRepository extends JpaRepository<Concert, BigInteger> {
+public interface ConcertRepository extends JpaRepository<Concert, Long> {
     List<Concert> findAllByOrderByConcertDateAsc();
     List<Concert> findByTitleContainingIgnoreCase(String title);
     // 예매 오픈 대상 콘서트 (openTime이 현재보다 같거나 이전, closeTime이 null이거나 미래)

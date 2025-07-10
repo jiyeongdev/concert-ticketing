@@ -1,6 +1,5 @@
 package com.sdemo1.service.queue;
 
-import java.math.BigInteger;
 import com.sdemo1.dto.QueueEntryMessage;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,8 @@ public class QueueMessageListener {
             log.info("콘서트별 큐 입장 메시지 처리 시작: memberId={}, concertId={}, concertTitle={}", 
                     message.getMemberId(), message.getConcertId(), message.getConcertTitle());
 
-            BigInteger memberId = message.getMemberId();
-            BigInteger concertId = message.getConcertId();
+            Long memberId = message.getMemberId();
+            Long concertId = message.getConcertId();
         
             // Redis에 사용자 상태를 READY로 변경 (예매 입장 허용)
             boolean success = redisQueueService.setUserReady(memberId, concertId);

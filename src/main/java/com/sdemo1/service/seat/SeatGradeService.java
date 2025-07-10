@@ -1,6 +1,5 @@
 package com.sdemo1.service.seat;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -31,7 +30,7 @@ public class SeatGradeService {
     /**
      * 콘서트의 모든 좌석등급 조회 (Redis 캐시 적용)
      */
-    public List<SeatGradeDto> getSeatGradesByConcertId(BigInteger concertId) {
+    public List<SeatGradeDto> getSeatGradesByConcertId(Long concertId) {
         String cacheKey = CacheKeyGenerator.getSeatGradesByConcertKey(concertId);
         
         List<SeatGradeDto> seatGrades = (List<SeatGradeDto>) redisTemplate.opsForValue().get(cacheKey);
@@ -54,7 +53,7 @@ public class SeatGradeService {
     /**
      * 좌석등급 ID로 조회 (Redis 캐시 적용)
      */
-    public SeatGradeDto getSeatGradeById(BigInteger id) {
+    public SeatGradeDto getSeatGradeById(Long id) {
         String cacheKey = CacheKeyGenerator.getSeatGradeByIdKey(id);
         
         SeatGradeDto seatGrade = (SeatGradeDto) redisTemplate.opsForValue().get(cacheKey);
@@ -91,7 +90,7 @@ public class SeatGradeService {
     /**
      * 좌석등급 수정 (Redis 캐시 무효화)
      */
-    public SeatGradeDto updateSeatGrade(BigInteger id, SeatGradeDto seatGradeDto) {
+    public SeatGradeDto updateSeatGrade(Long id, SeatGradeDto seatGradeDto) {
         log.info("=== 좌석등급 수정: {} ===", id);
         
         SeatGrade existingSeatGrade = seatGradeRepository.findById(id)
@@ -111,12 +110,12 @@ public class SeatGradeService {
     /**
      * 좌석등급 삭제 (Redis 캐시 무효화)
      */
-    public void deleteSeatGrade(BigInteger id) {
+    public void deleteSeatGrade(Long id) {
         log.info("=== 좌석등급 삭제: {} ===", id);
         SeatGrade seatGrade = seatGradeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("좌석등급을 찾을 수 없습니다: " + id));
         
-        BigInteger concertId = seatGrade.getConcert().getId();
+        Long concertId = seatGrade.getConcert().getId();
         seatGradeRepository.deleteById(id);
         
         // 관련 캐시 무효화
@@ -126,7 +125,7 @@ public class SeatGradeService {
     /**
      * 콘서트 캐시 무효화
      */
-    public void evictConcertCache(BigInteger concertId) {
+    public void evictConcertCache(Long concertId) {
         log.info("=== 콘서트 좌석등급 캐시 무효화: {} ===", concertId);
         cacheInvalidationUtils.invalidateSeatGradeCaches(concertId);
     }

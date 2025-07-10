@@ -1,6 +1,5 @@
 package com.sdemo1.service.seat;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +36,7 @@ public class SeatService {
     /**
      * 콘서트의 모든 좌석 조회 (Redis 캐시 적용)
      */
-    public List<SeatDto> getSeatsByConcertId(BigInteger concertId) {
+    public List<SeatDto> getSeatsByConcertId(Long concertId) {
         String cacheKey = CacheKeyGenerator.getSeatsByConcertKey(concertId);
         
         List<SeatDto> seats = (List<SeatDto>) redisTemplate.opsForValue().get(cacheKey);
@@ -60,7 +59,7 @@ public class SeatService {
     /**
      * 좌석 ID로 조회 (Redis 캐시 적용)
      */
-    public SeatDto getSeatById(BigInteger id) {
+    public SeatDto getSeatById(Long id) {
         String cacheKey = CacheKeyGenerator.getSeatByIdKey(id);
         
         SeatDto seat = (SeatDto) redisTemplate.opsForValue().get(cacheKey);
@@ -82,7 +81,7 @@ public class SeatService {
     /**
      * 콘서트 ID와 좌석등급 ID로 좌석 조회 (Redis 캐시 적용)
      */
-    public List<SeatDto> getSeatsByConcertIdAndGradeId(BigInteger concertId, BigInteger seatGradeId) {
+    public List<SeatDto> getSeatsByConcertIdAndGradeId(Long concertId, Long seatGradeId) {
         String cacheKey = CacheKeyGenerator.getSeatsByConcertAndGradeKey(concertId, seatGradeId);
         
         List<SeatDto> seats = (List<SeatDto>) redisTemplate.opsForValue().get(cacheKey);
@@ -105,7 +104,7 @@ public class SeatService {
     /**
      * 콘서트 ID와 좌석 상태로 조회 (Redis 캐시 적용)
      */
-    public List<SeatDto> getSeatsByConcertIdAndStatus(BigInteger concertId, Seat.SeatStatus status) {
+    public List<SeatDto> getSeatsByConcertIdAndStatus(Long concertId, Seat.SeatStatus status) {
         String cacheKey = CacheKeyGenerator.getSeatsByConcertAndStatusKey(concertId, status.toString());
         
         List<SeatDto> seats = (List<SeatDto>) redisTemplate.opsForValue().get(cacheKey);
@@ -204,7 +203,7 @@ public class SeatService {
     /**
      * 좌석 수정 (Redis 캐시 무효화)
      */
-    public SeatDto updateSeat(BigInteger id, SeatDto seatDto) {
+    public SeatDto updateSeat(Long id, SeatDto seatDto) {
         log.info("=== 좌석 수정: {} ===", id);
         
         Seat existingSeat = seatRepository.findById(id)
@@ -240,12 +239,12 @@ public class SeatService {
     /**
      * 좌석 삭제 (Redis 캐시 무효화)
      */
-    public void deleteSeat(BigInteger id) {
+    public void deleteSeat(Long id) {
         log.info("=== 좌석 삭제: {} ===", id);
         Seat seat = seatRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("좌석을 찾을 수 없습니다: " + id));
         
-        BigInteger concertId = seat.getConcert().getId();
+        Long concertId = seat.getConcert().getId();
         seatRepository.deleteById(id);
         
         // 관련 캐시 무효화
@@ -255,7 +254,7 @@ public class SeatService {
     /**
      * 콘서트의 모든 좌석 수정 (Redis 캐시 무효화)
      */
-    public List<SeatDto> updateSeatsByConcert(BigInteger concertId, List<SeatDto> seatDtos) {
+    public List<SeatDto> updateSeatsByConcert(Long concertId, List<SeatDto> seatDtos) {
         log.info("=== 콘서트별 좌석 수정: {} - {}개 ===", concertId, seatDtos.size());
         
         // 콘서트 존재 여부 확인
@@ -284,11 +283,11 @@ public class SeatService {
      * 콘서트의 모든 좌석 삭제 (Redis 캐시 무효화)
      * 예약이 있는 좌석은 삭제하지 않음
      */
-    public void deleteSeatsByConcert(BigInteger concertId) {
+    public void deleteSeatsByConcert(Long concertId) {
         log.info("=== 콘서트별 좌석 삭제: {} ===", concertId);
         
         // 예약이 있는 좌석 ID 목록 조회
-        List<BigInteger> reservedSeatIds = reservationRepository.findReservedSeatIdsByConcertId(concertId);
+        List<Long> reservedSeatIds = reservationRepository.findReservedSeatIdsByConcertId(concertId);
         
         if (!reservedSeatIds.isEmpty()) {
             log.warn("예약이 있는 좌석이 있어 삭제를 건너뜁니다. 예약된 좌석 수: {}", reservedSeatIds.size());
@@ -307,7 +306,7 @@ public class SeatService {
     /**
      * 좌석 상태 변경 (Redis 캐시 무효화)
      */
-    public SeatDto updateSeatStatus(BigInteger id, Seat.SeatStatus status) {
+    public SeatDto updateSeatStatus(Long id, Seat.SeatStatus status) {
         log.info("=== 좌석 상태 변경: {} -> {} ===", id, status);
         
         Seat seat = seatRepository.findById(id)
@@ -325,14 +324,14 @@ public class SeatService {
     /**
      * 사용 가능한 좌석 수 조회
      */
-    public long getAvailableSeatCount(BigInteger concertId) {
+    public long getAvailableSeatCount(Long concertId) {
         return seatRepository.countAvailableSeatsByConcertId(concertId);
     }
 
     /**
      * 콘서트 캐시 무효화
      */
-    public void evictConcertCache(BigInteger concertId) {
+    public void evictConcertCache(Long concertId) {
         log.info("=== 콘서트 좌석 캐시 무효화: {} ===", concertId);
         cacheInvalidationUtils.invalidateSeatCaches(concertId);
     }

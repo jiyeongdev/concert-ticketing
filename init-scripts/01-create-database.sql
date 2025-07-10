@@ -1,3 +1,7 @@
+-- 데이터베이스 초기화
+CREATE DATABASE IF NOT EXISTS mydb;
+USE mydb;
+
 -- UTF-8 인코딩 설정
 SET NAMES utf8mb4;
 SET character_set_client = utf8mb4;
@@ -5,10 +9,9 @@ SET character_set_connection = utf8mb4;
 SET character_set_results = utf8mb4;
 SET collation_connection = utf8mb4_unicode_ci;
 
--- 데이터베이스 초기화
-USE mydb;
-
 -- 테이블 삭제 (외래키 관계 순서 고려)
+
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS seat_holds;
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS reservations;
@@ -17,6 +20,7 @@ DROP TABLE IF EXISTS seats;
 DROP TABLE IF EXISTS seat_grades;
 DROP TABLE IF EXISTS concerts;
 DROP TABLE IF EXISTS member;
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- 테이블 생성
 CREATE TABLE member (

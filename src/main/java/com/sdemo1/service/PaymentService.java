@@ -1,6 +1,5 @@
 package com.sdemo1.service;
 
-import java.math.BigInteger;
 import java.util.Optional;
 import com.sdemo1.entity.Member;
 import com.sdemo1.entity.Payment;
@@ -219,9 +218,9 @@ public class PaymentService {
     @lombok.Data
     @lombok.Builder
     public static class PaymentRequest {
-        private BigInteger memberId;
-        private BigInteger concertId;
-        private BigInteger seatId;
+        private Long memberId;
+        private Long concertId;
+        private Long seatId;
         private Integer amount;
         private String paymentMethod; // CARD, BANK_TRANSFER 등
     }

@@ -1,6 +1,5 @@
 package com.sdemo1.controller.seat;
 
-import java.math.BigInteger;
 import com.sdemo1.dto.seat.SeatHoldResult;
 import com.sdemo1.dto.seat.SeatHoldWebSocketDto.SeatHoldRequest;
 import com.sdemo1.dto.seat.SeatHoldWebSocketDto.SeatReleaseRequest;
@@ -37,7 +36,7 @@ public class SeatHoldController {
      * 좌석 점유 요청 처리 (WebSocket)
      */
     @MessageMapping("/{concertId}/hold")
-    public void holdSeat(@DestinationVariable("concertId") BigInteger concertId, 
+    public void holdSeat(@DestinationVariable("concertId") Long concertId, 
                         SeatHoldRequest request, 
                         SimpMessageHeaderAccessor headerAccessor) {
         processSeatOperation(
@@ -55,7 +54,7 @@ public class SeatHoldController {
      * 좌석 해제 요청 처리 (WebSocket)
      */
     @MessageMapping("/{concertId}/release")
-    public void releaseSeat(@DestinationVariable("concertId") BigInteger concertId, 
+    public void releaseSeat(@DestinationVariable("concertId") Long concertId, 
                            SeatReleaseRequest request, 
                            SimpMessageHeaderAccessor headerAccessor) {  
         processSeatOperation(
@@ -72,7 +71,7 @@ public class SeatHoldController {
     /**
      * 좌석 작업 공통 처리 메서드
      */
-    private void processSeatOperation(BigInteger concertId, BigInteger seatId, BigInteger memberId,
+    private void processSeatOperation(Long concertId, Long seatId, Long memberId,
                                     String sessionId, String operationName,
                                     SeatOperation operation, String operationType) {
         
@@ -113,7 +112,7 @@ public class SeatHoldController {
     /**
      * 성공 처리
      */
-    private void handleSuccess(BigInteger concertId, BigInteger seatId, SeatHoldResult result, String operationType) {
+    private void handleSuccess(Long concertId, Long seatId, SeatHoldResult result, String operationType) {
         try {
             String broadcastTopic = determineBroadcastTopic(concertId, operationType);
             webSocketMessageService.broadcastMessage(broadcastTopic, result);
@@ -126,7 +125,7 @@ public class SeatHoldController {
     /**
      * 실패 처리
      */
-    private void handleFailure(String sessionId, BigInteger concertId, SeatHoldResult result) {
+    private void handleFailure(String sessionId, Long concertId, SeatHoldResult result) {
         try {
             if (sessionId != null) {
                 webSocketMessageService.sendSeatHoldError(sessionId, concertId, result);
@@ -140,7 +139,7 @@ public class SeatHoldController {
     /**
      * 브로드캐스트 토픽 결정
      */
-    private String determineBroadcastTopic(BigInteger concertId, String operationType) {
+    private String determineBroadcastTopic(Long concertId, String operationType) {
         switch (operationType) {
             case "HOLD":
                 return "/topic/" + concertId + "/hold";
@@ -156,14 +155,14 @@ public class SeatHoldController {
      */
     @FunctionalInterface
     private interface SeatOperation {
-        SeatHoldResult execute(BigInteger concertId, BigInteger seatId, BigInteger memberId, String sessionId);
+        SeatHoldResult execute(Long concertId, Long seatId, Long memberId, String sessionId);
     }
 
     /**
      * 좌석 작업 로깅
      */
-    private void logSeatOperation(String operationName, BigInteger concertId, BigInteger seatId, 
-                                 BigInteger memberId) {
+    private void logSeatOperation(String operationName, Long concertId, Long seatId, 
+                                 Long memberId) {
         log.info("{} 요청 (WebSocket): concertId={}, seatId={}, memberId={}", 
             operationName, concertId, seatId, memberId);
     }

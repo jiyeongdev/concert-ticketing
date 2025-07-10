@@ -1,6 +1,5 @@
 package com.sdemo1.service.seat.hold;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +51,7 @@ public class RedisSeatHoldService {
     // Redis 키 생성 함수형 인터페이스
     @FunctionalInterface
     private interface RedisKeyGenerator {
-        String generate(BigInteger concertId, BigInteger seatId, BigInteger memberId);
+        String generate(Long concertId, Long seatId, Long memberId);
     }
     
     // Redis 트랜잭션 실행 함수형 인터페이스
@@ -64,7 +63,7 @@ public class RedisSeatHoldService {
     // 결과 검증 함수형 인터페이스
     @FunctionalInterface
     private interface ResultValidator {
-        void validate(List<Object> results, BigInteger concertId, BigInteger seatId, BigInteger memberId);
+        void validate(List<Object> results, Long concertId, Long seatId, Long memberId);
     }
     
     // Redis 키 생성기들
@@ -102,8 +101,8 @@ public class RedisSeatHoldService {
             Matcher matcher = SEAT_HOLD_KEY_PATTERN.matcher(expiredKey);
             if (matcher.matches()) {
                 String keyType = matcher.group(1); // concerthold 또는 userhold
-                BigInteger concertId = new BigInteger(matcher.group(2));
-                BigInteger seatId = new BigInteger(matcher.group(3));
+                Long concertId = Long.valueOf(matcher.group(2));
+                Long seatId = Long.valueOf(matcher.group(3));
                 
                 log.info("좌석 점유 만료 감지: keyType={}, concertId={}, seatId={}", keyType, concertId, seatId);
                 
@@ -120,7 +119,7 @@ public class RedisSeatHoldService {
     /**
      * 만료된 좌석 점유 정보 정리
      */
-    private void cleanupExpiredSeatHold(BigInteger concertId, BigInteger seatId) {
+    private void cleanupExpiredSeatHold(Long concertId, Long seatId) {
         try {
             // DB에서 만료된 점유 정보 삭제
                 seatHoldRepository.deleteBySeatId(seatId);
@@ -140,9 +139,9 @@ public class RedisSeatHoldService {
      */
     private <T> T executeRedisOperation(
             String operationName,
-            BigInteger concertId, 
-            BigInteger seatId, 
-            BigInteger memberId,
+            Long concertId, 
+            Long seatId, 
+            Long memberId,
             RedisTransactionExecutor transactionExecutor,
             ResultValidator resultValidator,
             Function<List<Object>, T> resultProcessor,
@@ -190,7 +189,7 @@ public class RedisSeatHoldService {
      * 좌석 점유 (Redis + DB 트랜잭션으로 원자적 처리)
      */
     @Transactional
-    public boolean holdSeat(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    public boolean holdSeat(Long concertId, Long seatId, Long memberId) {
         return executeRedisOperation(
             "좌석 점유",
             concertId, seatId, memberId,
@@ -245,7 +244,7 @@ public class RedisSeatHoldService {
      * 좌석 점유 해제 (Redis + DB 트랜잭션으로 원자적 처리)
      */
     @Transactional
-    public boolean releaseSeat(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    public boolean releaseSeat(Long concertId, Long seatId, Long memberId) {
         return executeRedisOperation(
             "좌석 해제",
             concertId, seatId, memberId,
@@ -288,22 +287,22 @@ public class RedisSeatHoldService {
     /**
      * 사용자의 점유 좌석 조회
      */
-    public List<BigInteger> getUserHeldSeats(BigInteger memberId, BigInteger concertId) {
-        String userKey = USER_KEY_GENERATOR.generate(concertId, BigInteger.ZERO, memberId);
+    public List<Long> getUserHeldSeats(Long memberId, Long concertId) {
+        String userKey = USER_KEY_GENERATOR.generate(concertId, 0L, memberId);
         Set<String> members = redisTemplate.opsForSet().members(userKey);
         if (members == null) {
             return List.of();
         }
         return members.stream()
-            .map(BigInteger::new)
+            .map(Long::valueOf)
             .toList();
     }
     
     /**
      * 좌석 상태 조회
      */
-    public String getSeatStatus(BigInteger concertId, BigInteger seatId) {
-        String seatKey = SEAT_KEY_GENERATOR.generate(concertId, seatId, BigInteger.ZERO);
+    public String getSeatStatus(Long concertId, Long seatId) {
+        String seatKey = SEAT_KEY_GENERATOR.generate(concertId, seatId, 0L);
         String heldBy = redisTemplate.opsForValue().get(seatKey);
         
         if (heldBy != null) {
@@ -317,8 +316,8 @@ public class RedisSeatHoldService {
     /**
      * 좌석 점유 정보 조회
      */
-    public SeatHoldInfo getSeatHoldInfo(BigInteger concertId, BigInteger seatId) {
-        String seatKey = SEAT_KEY_GENERATOR.generate(concertId, seatId, BigInteger.ZERO);
+    public SeatHoldInfo getSeatHoldInfo(Long concertId, Long seatId) {
+        String seatKey = SEAT_KEY_GENERATOR.generate(concertId, seatId, 0L);
         String heldBy = redisTemplate.opsForValue().get(seatKey);
         
         if (heldBy == null) {
@@ -329,7 +328,7 @@ public class RedisSeatHoldService {
         Long ttl = redisTemplate.getExpire(seatKey, TimeUnit.SECONDS);
         
         return SeatHoldInfo.builder()
-            .memberId(new BigInteger(heldBy))
+            .memberId(Long.valueOf(heldBy))
             .remainingSeconds(ttl != null ? ttl : 0L)
             .build();
     }
@@ -338,7 +337,7 @@ public class RedisSeatHoldService {
      * 좌석 예매 확정 (Redis + DB 트랜잭션으로 원자적 처리)
      */
     @Transactional
-    public boolean confirmReservation(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    public boolean confirmReservation(Long concertId, Long seatId, Long memberId) {
         return executeRedisOperation(
             "좌석 예매 확정",
             concertId, seatId, memberId,
@@ -385,7 +384,7 @@ public class RedisSeatHoldService {
     /**
      * 새로운 좌석 점유 설정 (Redis)
      */
-    private void setNewSeatHold(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    private void setNewSeatHold(Long concertId, Long seatId, Long memberId) {
         String seatKey = SEAT_KEY_GENERATOR.generate(concertId, seatId, memberId);
         String userKey = USER_KEY_GENERATOR.generate(concertId, seatId, memberId);
         
@@ -407,7 +406,7 @@ public class RedisSeatHoldService {
     /**
      * 좌석 해제 (Redis)
      */
-    private void releaseSeatHold(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    private void releaseSeatHold(Long concertId, Long seatId, Long memberId) {
         String seatKey = SEAT_KEY_GENERATOR.generate(concertId, seatId, memberId);
         String userKey = USER_KEY_GENERATOR.generate(concertId, seatId, memberId);
         
@@ -426,7 +425,7 @@ public class RedisSeatHoldService {
     /**
      * Redis 점유 롤백
      */
-    private void rollbackRedisHold(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    private void rollbackRedisHold(Long concertId, Long seatId, Long memberId) {
         String seatKey = SEAT_KEY_GENERATOR.generate(concertId, seatId, memberId);
         String userKey = USER_KEY_GENERATOR.generate(concertId, seatId, memberId);
         
@@ -445,14 +444,14 @@ public class RedisSeatHoldService {
     @lombok.Data
     @lombok.Builder
     public static class SeatHoldInfo {
-        private BigInteger memberId;
+        private Long memberId;
         private Long remainingSeconds;
     }
     
     /**
      * Redis → DB 동기화 (좌석 점유) - 내부 메서드 (트랜잭션 내에서 호출)
      */
-    private void syncHoldToDatabaseInternal(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    private void syncHoldToDatabaseInternal(Long concertId, Long seatId, Long memberId) {
         try {
             log.info("DB 동기화 시작: 좌석 점유 - concertId={}, seatId={}, memberId={}", 
                 concertId, seatId, memberId);
@@ -491,7 +490,7 @@ public class RedisSeatHoldService {
     /**
      * Redis → DB 동기화 (좌석 해제) - 내부 메서드 (트랜잭션 내에서 호출)
      */
-    private void syncReleaseToDatabaseInternal(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    private void syncReleaseToDatabaseInternal(Long concertId, Long seatId, Long memberId) {
         try {
             log.info("DB 동기화 시작: 좌석 해제 - concertId={}, seatId={}, memberId={}", 
                 concertId, seatId, memberId);
@@ -512,7 +511,7 @@ public class RedisSeatHoldService {
     /**
      * Redis → DB 동기화 (예매 확정) - 내부 메서드 (트랜잭션 내에서 호출)
      */
-    private void syncConfirmToDatabaseInternal(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    private void syncConfirmToDatabaseInternal(Long concertId, Long seatId, Long memberId) {
         try {
             log.info("DB 동기화 시작: 예매 확정 - concertId={}, seatId={}, memberId={}", 
                 concertId, seatId, memberId);
@@ -541,7 +540,7 @@ public class RedisSeatHoldService {
      * Redis → DB 동기화 (좌석 점유) - 외부 호출용
      */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
-    public void syncHoldToDatabase(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    public void syncHoldToDatabase(Long concertId, Long seatId, Long memberId) {
         syncHoldToDatabaseInternal(concertId, seatId, memberId);
     }
     
@@ -549,7 +548,7 @@ public class RedisSeatHoldService {
      * Redis → DB 동기화 (좌석 해제) - 외부 호출용
      */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
-    public void syncReleaseToDatabase(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    public void syncReleaseToDatabase(Long concertId, Long seatId, Long memberId) {
         syncReleaseToDatabaseInternal(concertId, seatId, memberId);
     }
     
@@ -557,7 +556,7 @@ public class RedisSeatHoldService {
      * Redis → DB 동기화 (예매 확정) - 외부 호출용
      */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
-    public void syncConfirmToDatabase(BigInteger concertId, BigInteger seatId, BigInteger memberId) {
+    public void syncConfirmToDatabase(Long concertId, Long seatId, Long memberId) {
         syncConfirmToDatabaseInternal(concertId, seatId, memberId);
     }
 } 

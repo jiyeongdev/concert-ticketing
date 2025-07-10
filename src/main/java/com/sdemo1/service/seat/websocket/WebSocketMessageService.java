@@ -1,6 +1,5 @@
 package com.sdemo1.service.seat.websocket;
 
-import java.math.BigInteger;
 import com.sdemo1.dto.seat.SeatHoldResult;
 import com.sdemo1.dto.seat.SeatHoldWebSocketDto.SeatHoldResponse;
 import org.springframework.messaging.MessageHeaders;
@@ -58,7 +57,7 @@ public class WebSocketMessageService {
     /**
      * 좌석 점유/해제 에러 메시지 전송
      */
-    public void sendSeatHoldError(String sessionId, BigInteger concertId, SeatHoldResult result) {
+    public void sendSeatHoldError(String sessionId, Long concertId, SeatHoldResult result) {
         try {
             // 에러 메시지 생성
             SeatHoldResponse errorResponse = SeatHoldResponse.builder()

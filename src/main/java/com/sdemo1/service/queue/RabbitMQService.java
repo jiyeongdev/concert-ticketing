@@ -1,6 +1,5 @@
 package com.sdemo1.service.queue;
 
-import java.math.BigInteger;
 import com.sdemo1.dto.QueueEntryMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +27,7 @@ public class RabbitMQService {
      * 큐 입장 처리 메시지 전송
      * Redis에서 상위 N명을 추출한 후 이 메서드를 호출하여 순차 처리
      */
-    public void sendToProcessingQueue(BigInteger memberId, BigInteger concertId, String concertTitle) {
+    public void sendToProcessingQueue(Long memberId, Long concertId, String concertTitle) {
         QueueEntryMessage message = QueueEntryMessage.builder()
                 .memberId(memberId)
                 .concertId(concertId)

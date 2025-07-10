@@ -5,7 +5,6 @@
 
 package com.sdemo1.entity;
 
-import java.math.BigInteger;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,7 +30,7 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private BigInteger memberId;
+    private Long memberId;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;

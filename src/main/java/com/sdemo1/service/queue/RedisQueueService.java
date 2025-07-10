@@ -1,6 +1,5 @@
 package com.sdemo1.service.queue;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +36,7 @@ public class RedisQueueService {
     /**
      * 대기열에 사용자 등록
      */
-    public boolean joinWaitingRoom(BigInteger memberId, BigInteger concertId) {
+    public boolean joinWaitingRoom(Long memberId, Long concertId) {
         String concertKey = CONCERT_PREFIX + concertId;
         String userStatusKey = USER_STATUS_PREFIX + memberId + ":" + concertId;
         
@@ -74,7 +73,7 @@ public class RedisQueueService {
     /**
      * 사용자가 대기열에 있는지 확인
      */
-    public boolean isUserInWaitingRoom(BigInteger memberId, BigInteger concertId) {
+    public boolean isUserInWaitingRoom(Long memberId, Long concertId) {
         String concertKey = CONCERT_PREFIX + concertId;
         String userStatusKey = USER_STATUS_PREFIX + memberId + ":" + concertId;
         
@@ -101,7 +100,7 @@ public class RedisQueueService {
     /**
      * 사용자의 대기 순번 조회
      */
-    public Long getUserQueueNumber(BigInteger memberId, BigInteger concertId) {
+    public Long getUserQueueNumber(Long memberId, Long concertId) {
         String concertKey = CONCERT_PREFIX + concertId;
         
         try {
@@ -116,7 +115,7 @@ public class RedisQueueService {
     /**
      * 전체 대기자 수 조회
      */
-    public Long getWaitingCount(BigInteger concertId) {
+    public Long getWaitingCount(Long concertId) {
         String concertKey = CONCERT_PREFIX + concertId;
         
         try {
@@ -130,7 +129,7 @@ public class RedisQueueService {
     /**
      * 대기열에서 사용자 제거
      */
-    public boolean leaveWaitingRoom(BigInteger memberId, BigInteger concertId) {
+    public boolean leaveWaitingRoom(Long memberId, Long concertId) {
         String concertKey = CONCERT_PREFIX + concertId;
         String userStatusKey = USER_STATUS_PREFIX + memberId + ":" + concertId;
         
@@ -152,7 +151,7 @@ public class RedisQueueService {
     /**
      * 예매 오픈 시 상위 N명 추출
      */
-    public List<String> getTopWaitingUsers(BigInteger concertId, int count) {
+    public List<String> getTopWaitingUsers(Long concertId, int count) {
         String concertKey = CONCERT_PREFIX + concertId;
         
         try {
@@ -172,7 +171,7 @@ public class RedisQueueService {
     /**
      * 예매 오픈 시 상위 N명 제거
      */
-    public boolean removeTopWaitingUsers(BigInteger concertId, int count) {
+    public boolean removeTopWaitingUsers(Long concertId, int count) {
         String concertKey = CONCERT_PREFIX + concertId;
         
         try {
@@ -192,7 +191,7 @@ public class RedisQueueService {
     /**
      * 사용자 상태를 READY로 변경 (예매 입장 허용)
      */
-    public boolean setUserReady(BigInteger memberId, BigInteger concertId) {
+    public boolean setUserReady(Long memberId, Long concertId) {
         String userStatusKey = USER_STATUS_PREFIX + memberId + ":" + concertId;
         
         try {
@@ -210,7 +209,7 @@ public class RedisQueueService {
     /**
      * 사용자 상태 확인
      */
-    public String getUserStatus(BigInteger memberId, BigInteger concertId) {
+    public String getUserStatus(Long memberId, Long concertId) {
         String userStatusKey = USER_STATUS_PREFIX + memberId + ":" + concertId;
         
         try {
@@ -225,7 +224,7 @@ public class RedisQueueService {
     /**
      * 사용자 상태를 ENTERED로 변경 (입장 완료)
      */
-    public boolean setUserEntered(BigInteger memberId, BigInteger concertId) {
+    public boolean setUserEntered(Long memberId, Long concertId) {
         String userStatusKey = USER_STATUS_PREFIX + memberId + ":" + concertId;
         
         try {

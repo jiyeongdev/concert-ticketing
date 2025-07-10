@@ -216,7 +216,7 @@ public class AuthController {
             log.info("user: {}", memberId);
 
             // DB에서 사용자 정보 조회
-            Member member = memberRepository.findById(new java.math.BigInteger(memberId))
+            Member member = memberRepository.findById(Long.valueOf(memberId))
                     .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
             // 사용자 정보로 AccessToken 생성

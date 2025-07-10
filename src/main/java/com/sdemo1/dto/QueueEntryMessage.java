@@ -1,6 +1,5 @@
 package com.sdemo1.dto;
 
-import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QueueEntryMessage {
-    private BigInteger memberId;
-    private BigInteger concertId;
+    private Long memberId;
+    private Long concertId;
     private String concertTitle;
 } 

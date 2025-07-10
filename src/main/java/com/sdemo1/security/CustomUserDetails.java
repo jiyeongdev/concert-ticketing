@@ -1,14 +1,12 @@
 package com.sdemo1.security;
 
+import java.util.Collection;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.math.BigInteger;
-import java.util.Collection;
 
 @Data
 @Builder
@@ -16,7 +14,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
     
-    private BigInteger memberId;
+    private Long memberId;
     private String name;
     private String role;
     private String phone;

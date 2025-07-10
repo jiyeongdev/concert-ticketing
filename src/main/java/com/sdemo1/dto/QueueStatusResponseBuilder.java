@@ -1,15 +1,13 @@
 package com.sdemo1.dto;
 
-import com.sdemo1.entity.Concert;
-import com.sdemo1.response.QueueStatusResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import com.sdemo1.entity.Concert;
+import com.sdemo1.response.QueueStatusResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 대기열 상태 응답 빌더
@@ -31,7 +29,7 @@ public class QueueStatusResponseBuilder {
     /**
      * 예매 종료 상태 응답 생성
      */
-    public QueueStatusResponse buildBookingClosedResponse(BigInteger concertId, Concert concert) {
+    public QueueStatusResponse buildBookingClosedResponse(Long concertId, Concert concert) {
         return QueueStatusResponse.builder()
                 .concertId(concertId)
                 .concertTitle(concert.getTitle())
@@ -43,7 +41,7 @@ public class QueueStatusResponseBuilder {
     /**
      * 대기열에 없음 상태 응답 생성
      */
-    public QueueStatusResponse buildNotInQueueResponse(BigInteger concertId, Concert concert) {
+    public QueueStatusResponse buildNotInQueueResponse(Long concertId, Concert concert) {
         return QueueStatusResponse.builder()
                 .concertId(concertId)
                 .concertTitle(concert.getTitle())
@@ -55,7 +53,7 @@ public class QueueStatusResponseBuilder {
     /**
      * 입장 준비 완료 상태 응답 생성
      */
-    public QueueStatusResponse buildReadyResponse(BigInteger concertId, Concert concert) {
+    public QueueStatusResponse buildReadyResponse(Long concertId, Concert concert) {
         return QueueStatusResponse.builder()
                 .concertId(concertId)
                 .concertTitle(concert.getTitle())
@@ -67,7 +65,7 @@ public class QueueStatusResponseBuilder {
     /**
      * 입장 완료 상태 응답 생성
      */
-    public QueueStatusResponse buildEnteredResponse(BigInteger concertId, Concert concert) {
+    public QueueStatusResponse buildEnteredResponse(Long concertId, Concert concert) {
         return QueueStatusResponse.builder()
                 .concertId(concertId)
                 .concertTitle(concert.getTitle())
@@ -80,7 +78,7 @@ public class QueueStatusResponseBuilder {
      * 대기 중 상태 응답 생성
      */
     public QueueStatusResponse buildWaitingResponse(
-            BigInteger concertId, 
+            Long concertId, 
             Concert concert, 
             int queueNumber, 
             int totalWaitingCount, 
@@ -103,9 +101,9 @@ public class QueueStatusResponseBuilder {
      * 관리자용 대기열 응답 생성
      */
     public QueueStatusResponse buildAdminResponse(
-            BigInteger concertId,
+            Long concertId,
             Concert concert,
-            BigInteger memberId,
+            Long memberId,
             int queueNumber,
             int totalWaitingCount,
             int estimatedWaitTime,

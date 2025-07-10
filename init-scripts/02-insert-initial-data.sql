@@ -1,17 +1,12 @@
--- UTF-8 인코딩 설정
-SET NAMES utf8mb4;
-SET character_set_client = utf8mb4;
-SET character_set_connection = utf8mb4;
-SET character_set_results = utf8mb4;
-SET collation_connection = utf8mb4_unicode_ci;
 
 -- 초기 테스트 데이터 삽입
 -- 자동 생성된 파일입니다. 직접 편집하지 마세요.
+CREATE DATABASE IF NOT EXISTS mydb;
 USE mydb;
 
 -- USER 역할 사용자 100명
 INSERT INTO member (email, password, name, phone, role) VALUES
-('user1@test.com', '$2a$10$yWoFDsuI.JAnzKYIhi33kOKsetmePeQlWP2zsRu6kB9LowLebG0BO', 'User 1', '010-1001-0001', 'USER'),
+('user1-teste1@test.com', '$2a$10$yWoFDsuI.JAnzKYIhi33kOKsetmePeQlWP2zsRu6kB9LowLebG0BO', 'User 1', '010-1001-0001', 'USER'),
 ('user2@test.com', '$2a$10$yWoFDsuI.JAnzKYIhi33kOKsetmePeQlWP2zsRu6kB9LowLebG0BO', 'User 2', '010-1002-0002', 'USER'),
 ('user3@test.com', '$2a$10$yWoFDsuI.JAnzKYIhi33kOKsetmePeQlWP2zsRu6kB9LowLebG0BO', 'User 3', '010-1003-0003', 'USER'),
 ('user4@test.com', '$2a$10$yWoFDsuI.JAnzKYIhi33kOKsetmePeQlWP2zsRu6kB9LowLebG0BO', 'User 4', '010-1004-0004', 'USER'),

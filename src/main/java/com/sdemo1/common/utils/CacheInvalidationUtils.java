@@ -1,6 +1,5 @@
 package com.sdemo1.common.utils;
 
-import java.math.BigInteger;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ public class CacheInvalidationUtils {
     /**
      * 좌석 관련 캐시 무효화 (콘서트 ID 기반)
      */
-    public void invalidateSeatCaches(BigInteger concertId) {
+    public void invalidateSeatCaches(Long concertId) {
         String pattern = CacheKeyGenerator.getSeatsByConcertPattern(concertId);
         redisTemplate.delete(redisTemplate.keys(pattern));
         log.info("=== 좌석 캐시 무효화 완료: {} ===", pattern);
@@ -30,7 +29,7 @@ public class CacheInvalidationUtils {
     /**
      * 좌석등급 관련 캐시 무효화 (콘서트 ID 기반)
      */
-    public void invalidateSeatGradeCaches(BigInteger concertId) {
+    public void invalidateSeatGradeCaches(Long concertId) {
         String pattern = CacheKeyGenerator.getSeatGradesByConcertPattern(concertId);
         redisTemplate.delete(redisTemplate.keys(pattern));
         log.info("=== 좌석등급 캐시 무효화 완료: {} ===", pattern);
@@ -47,7 +46,7 @@ public class CacheInvalidationUtils {
     /**
      * 특정 콘서트 캐시 무효화
      */
-    public void invalidateConcertCache(BigInteger concertId) {
+    public void invalidateConcertCache(Long concertId) {
         String cacheKey = CacheKeyGenerator.getConcertByIdKey(concertId);
         redisTemplate.delete(cacheKey);
         log.info("=== 콘서트 캐시 무효화 완료: {} ===", cacheKey);
@@ -80,7 +79,7 @@ public class CacheInvalidationUtils {
     /**
      * 콘서트 관련 모든 캐시 무효화 (좌석, 좌석등급, 콘서트)
      */
-    public void invalidateAllConcertRelatedCaches(BigInteger concertId) {
+    public void invalidateAllConcertRelatedCaches(Long concertId) {
         invalidateSeatCaches(concertId);
         invalidateSeatGradeCaches(concertId);
         invalidateConcertCache(concertId);

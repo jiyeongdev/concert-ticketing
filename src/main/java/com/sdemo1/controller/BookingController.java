@@ -1,6 +1,5 @@
 package com.sdemo1.controller;
 
-import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.common.utils.BookingEligibilityChecker;
@@ -57,9 +56,9 @@ public class BookingController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "예매 자격 없음",
             content = @Content(examples = @ExampleObject(value = SwaggerExamples.ERROR_FORBIDDEN)))
     })
-    public ResponseEntity<ApiResponse<?>> getBookingToken(@PathVariable("concertId") BigInteger concertId) {
+    public ResponseEntity<ApiResponse<?>> getBookingToken(@PathVariable("concertId") Long concertId) {
         try {
-            BigInteger memberId = getCurrentMemberId();
+            Long memberId = getCurrentMemberId();
             log.info("=== 예매 토큰 발급 API 호출: memberId={}, concertId={} ===", memberId, concertId);
             
             // 예매 자격 확인 및 토큰 발급
@@ -87,8 +86,8 @@ public class BookingController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "좌석 상태 조회 성공",
             content = @Content(examples = @ExampleObject(value = SwaggerExamples.SEAT_STATUS_RESPONSE)))
     })
-    public ResponseEntity<?> getSeatStatus(@PathVariable("concertId") BigInteger concertId) {
-        BigInteger memberId = getCurrentMemberId();
+    public ResponseEntity<?> getSeatStatus(@PathVariable("concertId") Long concertId) {
+        Long memberId = getCurrentMemberId();
         log.info("실시간 좌석 상태 조회 (REST): concertId={}, memberId={}", concertId, memberId);
         
         // 예매 자격 확인 (ENTERED 상태만 허용)
@@ -120,9 +119,9 @@ public class BookingController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "좌석 점유 실패",
             content = @Content(examples = @ExampleObject(value = SwaggerExamples.SEAT_HOLD_FAILURE)))
     })
-    public ResponseEntity<?> holdSeat(@PathVariable("concertId") BigInteger concertId, 
-                                     @PathVariable("seatId") BigInteger seatId) {
-        BigInteger memberId = getCurrentMemberId();
+    public ResponseEntity<?> holdSeat(@PathVariable("concertId") Long concertId, 
+                                     @PathVariable("seatId") Long seatId) {
+        Long memberId = getCurrentMemberId();
         log.info("좌석 점유 요청 (REST): concertId={}, seatId={}, memberId={}", 
             concertId, seatId, memberId);
         
@@ -147,9 +146,9 @@ public class BookingController {
      */
     @DeleteMapping("/{concertId}/seats/{seatId}/hold")
     @Operation(summary = "좌석 해제", description = "점유한 좌석을 해제합니다")
-    public ResponseEntity<?> releaseSeat(@PathVariable("concertId") BigInteger concertId,
-                                        @PathVariable("seatId") BigInteger seatId) {
-        BigInteger memberId = getCurrentMemberId();
+    public ResponseEntity<?> releaseSeat(@PathVariable("concertId") Long concertId,
+                                        @PathVariable("seatId") Long seatId) {
+        Long memberId = getCurrentMemberId();
         log.info("좌석 해제 요청 (REST): concertId={}, seatId={}, memberId={}", 
             concertId, seatId, memberId);
         
@@ -178,7 +177,7 @@ public class BookingController {
     /**
      * 현재 인증된 사용자의 ID 가져오기
      */
-    private BigInteger getCurrentMemberId() {
+    private Long getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

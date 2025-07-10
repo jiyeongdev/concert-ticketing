@@ -1,6 +1,5 @@
 package com.sdemo1.common.utils;
 
-import java.math.BigInteger;
 import com.sdemo1.common.UserStatus;
 import com.sdemo1.service.queue.RedisQueueService;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,7 @@ public class BookingEligibilityChecker {
     /**
      * READY 또는 ENTERED 상태인지 확인
      */
-    public boolean checkReadyOrEntered(BigInteger memberId, BigInteger concertId) {
+    public boolean checkReadyOrEntered(Long memberId, Long concertId) {
         String statusStr = redisQueueService.getUserStatus(memberId, concertId);
         UserStatus status = UserStatus.fromString(statusStr);
         boolean isEligible = status == UserStatus.READY || status == UserStatus.ENTERED;
@@ -35,7 +34,7 @@ public class BookingEligibilityChecker {
     /**
      * READY 상태인지 확인
      */
-    public boolean checkReady(BigInteger memberId, BigInteger concertId) {
+    public boolean checkReady(Long memberId, Long concertId) {
         String statusStr = redisQueueService.getUserStatus(memberId, concertId);
         UserStatus status = UserStatus.fromString(statusStr);
         boolean isEligible = status == UserStatus.READY;
@@ -49,7 +48,7 @@ public class BookingEligibilityChecker {
     /**
      * ENTERED 상태인지 확인
      */
-    public boolean checkEntered(BigInteger memberId, BigInteger concertId) {
+    public boolean checkEntered(Long memberId, Long concertId) {
         String statusStr = redisQueueService.getUserStatus(memberId, concertId);
         UserStatus status = UserStatus.fromString(statusStr);
         boolean isEligible = status == UserStatus.ENTERED;
@@ -63,7 +62,7 @@ public class BookingEligibilityChecker {
     /**
      * WAITING 상태인지 확인
      */
-    public boolean checkWaiting(BigInteger memberId, BigInteger concertId) {
+    public boolean checkWaiting(Long memberId, Long concertId) {
         String statusStr = redisQueueService.getUserStatus(memberId, concertId);
         UserStatus status = UserStatus.fromString(statusStr);
         boolean isWaiting = status == UserStatus.WAITING;
@@ -77,14 +76,14 @@ public class BookingEligibilityChecker {
     /**
      * 예매 가능한 상태인지 확인 (READY 또는 ENTERED)
      */
-    public boolean isBookingEligible(BigInteger memberId, BigInteger concertId) {
+    public boolean isBookingEligible(Long memberId, Long concertId) {
         return checkReadyOrEntered(memberId, concertId);
     }
     
     /**
      * 실시간 좌석 상태 조회 가능한 상태인지 확인 (ENTERED)
      */
-    public boolean isSeatStatusViewable(BigInteger memberId, BigInteger concertId) {
+    public boolean isSeatStatusViewable(Long memberId, Long concertId) {
         return checkEntered(memberId, concertId);
     }
 } 

@@ -1,6 +1,5 @@
 package com.sdemo1.request;
 
-import java.math.BigInteger;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -15,13 +14,13 @@ import lombok.NoArgsConstructor;
 public class PaymentRequest {
     
     @NotNull(message = "사용자 ID는 필수입니다.")
-    private BigInteger memberId;
+    private Long memberId;
     
     @NotNull(message = "콘서트 ID는 필수입니다.")
-    private BigInteger concertId;
+    private Long concertId;
     
     @NotNull(message = "좌석 ID는 필수입니다.")
-    private BigInteger seatId;
+    private Long seatId;
     
     @NotNull(message = "결제 금액은 필수입니다.")
     @Positive(message = "결제 금액은 0보다 커야 합니다.")

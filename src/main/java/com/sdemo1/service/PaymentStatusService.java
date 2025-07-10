@@ -1,6 +1,5 @@
 package com.sdemo1.service;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import com.sdemo1.entity.Payment;
@@ -28,7 +27,7 @@ public class PaymentStatusService {
      * 결제 상태 업데이트
      */
     @Transactional
-    public void updatePaymentStatus(BigInteger paymentId, Payment.PaymentStatus status, String transactionId) {
+    public void updatePaymentStatus(Long paymentId, Payment.PaymentStatus status, String transactionId) {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 결제입니다."));
         
@@ -52,7 +51,7 @@ public class PaymentStatusService {
      * 예매 상태 업데이트
      */
     @Transactional
-    public void updateReservationStatus(BigInteger reservationId, Payment.PaymentStatus paymentStatus) {
+    public void updateReservationStatus(Long reservationId, Payment.PaymentStatus paymentStatus) {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예매입니다."));
         
@@ -75,7 +74,7 @@ public class PaymentStatusService {
     /**
      * 중복 결제 방지 체크
      */
-    public boolean isPaymentInProgress(BigInteger memberId, BigInteger seatId) {
+    public boolean isPaymentInProgress(Long memberId, Long seatId) {
         return paymentRepository.findByReservationId(
             reservationRepository.findByMemberIdAndSeatId(memberId, seatId)
                 .map(Reservation::getId)

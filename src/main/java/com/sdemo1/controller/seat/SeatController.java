@@ -1,6 +1,5 @@
 package com.sdemo1.controller.seat;
 
-import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.dto.seat.SeatDto;
@@ -35,7 +34,7 @@ public class SeatController {
      */
     @GetMapping("/concert/{concertId}")
     @Operation(summary = "콘서트별 좌석 조회", description = "특정 콘서트의 모든 좌석 정보를 조회합니다 (인증 필요)")
-    public ResponseEntity<ApiResponse<?>> getSeatsByConcertId(@PathVariable("concertId") BigInteger concertId) {
+    public ResponseEntity<ApiResponse<?>> getSeatsByConcertId(@PathVariable("concertId") Long concertId) {
         try {
             log.info("=== 콘서트 좌석 조회 API 호출: {} ===", concertId);
             List<SeatDto> seats = seatService.getSeatsByConcertId(concertId);
@@ -53,7 +52,7 @@ public class SeatController {
      */
     @PostMapping("/admin/{concertId}")
     @Operation(summary = "콘서트별 좌석 일괄 생성", description = "특정 콘서트의 좌석들을 일괄 생성합니다 (ADMIN 권한 필요)")
-    public ResponseEntity<ApiResponse<?>> createSeatsByConcert(@PathVariable("concertId") BigInteger concertId, @Valid @RequestBody List<SeatDto> seatDtos) {
+    public ResponseEntity<ApiResponse<?>> createSeatsByConcert(@PathVariable("concertId") Long concertId, @Valid @RequestBody List<SeatDto> seatDtos) {
         try {
             log.info("=== 콘서트별 좌석 일괄 생성 API 호출: {} ===", concertId);
             
@@ -80,7 +79,7 @@ public class SeatController {
      */
     @PutMapping("/admin/{seatId}")
     @Operation(summary = "좌석 수정", description = "특정 좌석 정보를 수정합니다 (ADMIN 권한 필요)")
-    public ResponseEntity<ApiResponse<?>> updateSeat(@PathVariable("seatId") BigInteger seatId,
+    public ResponseEntity<ApiResponse<?>> updateSeat(@PathVariable("seatId") Long seatId,
                                                    @Valid @RequestBody SeatDto seatDto) {
         try {
             SeatDto updatedSeat = seatService.updateSeat(seatId, seatDto);
@@ -99,7 +98,7 @@ public class SeatController {
      */
     @DeleteMapping("/admin/{seatId}")
     @Operation(summary = "좌석 삭제", description = "특정 좌석을 삭제합니다 (ADMIN 권한 필요)")
-    public ResponseEntity<ApiResponse<?>> deleteSeat(@PathVariable("seatId") BigInteger seatId) {
+    public ResponseEntity<ApiResponse<?>> deleteSeat(@PathVariable("seatId") Long seatId) {
         try {
             log.info("=== 좌석 삭제 API 호출: {} ===", seatId);
             

@@ -1,6 +1,5 @@
 package com.sdemo1.security;
 
-import java.math.BigInteger;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -198,7 +197,7 @@ public class JwtTokenProvider {
         log.info("JWT 토큰 subject: {}", claims.getSubject());
         // CustomUserDetails 생성
         CustomUserDetails userDetails = CustomUserDetails.builder()
-                .memberId(new BigInteger(claims.getSubject()))
+                .memberId(Long.valueOf(claims.getSubject()))
                 .name(claims.get("name", String.class))
                 .role(claims.get("role", String.class))
                 .phone(claims.get("phone", String.class))

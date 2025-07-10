@@ -1,6 +1,5 @@
 package com.sdemo1.service.queue;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.sdemo1.common.UserStatus;
@@ -42,7 +41,7 @@ public class EnhancedWaitingQueueService {
     /**
      * 대기열 입장 요청
      */
-    public QueueStatusResponse enterWaitingRoom(BigInteger memberId, JoinQueueRequest request) {
+    public QueueStatusResponse enterWaitingRoom(Long memberId, JoinQueueRequest request) {
         log.info("대기열 입장 요청: memberId={}, concertId={}", memberId, request.getConcertId());
 
         // 콘서트 정보 조회
@@ -94,7 +93,7 @@ public class EnhancedWaitingQueueService {
      * 대기열 상태 조회
      */
     @Transactional(readOnly = true)
-    public QueueStatusResponse getWaitingRoomStatus(BigInteger memberId, BigInteger concertId) {
+    public QueueStatusResponse getWaitingRoomStatus(Long memberId, Long concertId) {
         log.info("대기열 상태 조회: memberId={}, concertId={}", memberId, concertId);
 
         // 콘서트 정보 조회
@@ -150,7 +149,7 @@ public class EnhancedWaitingQueueService {
     /**
      * 대기열에서 나가기
      */
-    public void leaveWaitingRoom(BigInteger memberId, BigInteger concertId) {
+    public void leaveWaitingRoom(Long memberId, Long concertId) {
         log.info("대기열 나가기: memberId={}, concertId={}", memberId, concertId);
 
         // 콘서트 정보 조회
@@ -171,7 +170,7 @@ public class EnhancedWaitingQueueService {
     /**
      * 예매 시작 처리 (관리자/자동 트리거)
      */
-    public void startBooking(BigInteger concertId, int batchSize) {
+    public void startBooking(Long concertId, int batchSize) {
         log.info("예매 시작 처리: concertId={}, batchSize={}", concertId, batchSize);
 
         // 콘서트 정보 조회
@@ -196,7 +195,7 @@ public class EnhancedWaitingQueueService {
 
         // RabbitMQ에 메시지 발송 (순차 처리)
         for (String memberIdStr : topUsers) {
-            BigInteger memberId = new BigInteger(memberIdStr);
+            Long memberId = Long.valueOf(memberIdStr);
             rabbitMQService.sendToProcessingQueue(memberId, concertId, concert.getTitle());
             log.info("예매 입장 메시지 발송: memberId={}, concertId={}", memberId, concertId);
         }
@@ -207,7 +206,7 @@ public class EnhancedWaitingQueueService {
     /**
      * 예매 토큰 발급 (사용자 입장 자격 확인)
      */
-    public QueueStatusResponse getBookingToken(BigInteger memberId, BigInteger concertId) {
+    public QueueStatusResponse getBookingToken(Long memberId, Long concertId) {
         log.info("예매 토큰 요청: memberId={}, concertId={}", memberId, concertId);
 
         // 콘서트 정보 조회

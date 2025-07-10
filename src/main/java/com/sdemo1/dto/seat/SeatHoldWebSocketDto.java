@@ -1,6 +1,5 @@
 package com.sdemo1.dto.seat;
 
-import java.math.BigInteger;
 import java.util.List;
 import com.sdemo1.common.UserStatus;
 import lombok.AllArgsConstructor;
@@ -21,8 +20,8 @@ public class SeatHoldWebSocketDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SeatStatusSubscriptionRequest {
-        private BigInteger concertId;
-        private BigInteger memberId;
+        private Long concertId;
+        private Long memberId;
     }
 
     /**
@@ -33,9 +32,9 @@ public class SeatHoldWebSocketDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SeatHoldRequest {
-        private BigInteger concertId;
-        private BigInteger seatId;
-        private BigInteger memberId;
+        private Long concertId;
+        private Long seatId;
+        private Long memberId;
     }
 
     /**
@@ -46,9 +45,9 @@ public class SeatHoldWebSocketDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SeatReleaseRequest {
-        private BigInteger concertId;
-        private BigInteger seatId;
-        private BigInteger memberId;
+        private Long concertId;
+        private Long seatId;
+        private Long memberId;
     }
 
     /**
@@ -59,7 +58,7 @@ public class SeatHoldWebSocketDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SeatHoldResponse {
-        private BigInteger concertId;
+        private Long concertId;
         private List<SeatStatusDto> seats;
         private String type; // INITIAL_STATUS, HOLD_SUCCESS, HOLD_FAILED, RELEASE_SUCCESS, RELEASE_FAILED, SUBSCRIPTION_DENIED, etc.
         private String message;

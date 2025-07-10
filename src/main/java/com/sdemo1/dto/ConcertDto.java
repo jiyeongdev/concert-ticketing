@@ -1,17 +1,16 @@
 package com.sdemo1.dto;
 
+import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 /**
  * 콘서트 정보 DTO
  * Java 14+ Record 클래스 사용으로 불변 객체 생성
  */
 public record ConcertDto(
-    BigInteger id,
+    Long id,
     String title,
     String location,
     @JsonSerialize(using = LocalDateTimeSerializer.class)

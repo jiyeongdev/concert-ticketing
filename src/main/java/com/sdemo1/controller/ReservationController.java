@@ -1,6 +1,5 @@
 package com.sdemo1.controller;
 
-import java.math.BigInteger;
 import com.sdemo1.common.response.ApiResponse;
 import com.sdemo1.config.SwaggerExamples;
 import com.sdemo1.request.PaymentRequest;
@@ -52,7 +51,7 @@ public class ReservationController {
     })
     public ResponseEntity<ApiResponse<?>> processPayment(@Valid @RequestBody PaymentRequest request) {
         try {
-            BigInteger memberId = getCurrentMemberId();
+            Long memberId = getCurrentMemberId();
             log.info("=== 결제 처리 API 호출: memberId={}, seatId={}, amount={} ===", 
                 memberId, request.getSeatId(), request.getAmount());
             
@@ -94,10 +93,10 @@ public class ReservationController {
      */
     @DeleteMapping("/payment/{paymentId}")
     @Operation(summary = "결제 취소", description = "완료된 결제를 취소하고 예매를 해제합니다")
-    public ResponseEntity<ApiResponse<?>> cancelPayment(@PathVariable("paymentId") BigInteger paymentId,
+    public ResponseEntity<ApiResponse<?>> cancelPayment(@PathVariable("paymentId") Long paymentId,
                                                       @RequestParam("reason") String reason) {
         try {
-            BigInteger memberId = getCurrentMemberId();
+            Long memberId = getCurrentMemberId();
             log.info("=== 결제 취소 API 호출: memberId={}, paymentId={}, reason={} ===", 
                 memberId, paymentId, reason);
             
@@ -122,7 +121,7 @@ public class ReservationController {
     /**
      * 현재 인증된 사용자의 ID 가져오기
      */
-    private BigInteger getCurrentMemberId() {
+    private Long getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

@@ -1,6 +1,5 @@
 package com.sdemo1.dto.seat;
 
-import java.math.BigInteger;
 import io.micrometer.common.lang.Nullable;
 
 /**
@@ -9,9 +8,9 @@ import io.micrometer.common.lang.Nullable;
  */
 public record SeatGradeDto(
     @Nullable
-    BigInteger id,
+    Long id,
     
-    BigInteger concertId,
+    Long concertId,
     String gradeName,  // VIP, R, S, A, B 등
     Integer price
 ) {

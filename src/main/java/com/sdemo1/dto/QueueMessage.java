@@ -1,20 +1,18 @@
 package com.sdemo1.dto;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class QueueMessage {
-    private BigInteger memberId;
-    private BigInteger concertId;
+    private Long memberId;
+    private Long concertId;
     private String memberName;
     private String concertTitle;
     private Integer queueNumber;

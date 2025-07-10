@@ -1,6 +1,5 @@
 package com.sdemo1.service.seat.hold;
 
-import java.math.BigInteger;
 import com.sdemo1.common.UserStatus;
 import com.sdemo1.common.utils.BookingEligibilityChecker;
 import com.sdemo1.dto.seat.SeatHoldResult;
@@ -48,7 +47,7 @@ public class SeatHoldService {
      * 2. Redis 기반 좌석 점유
      * 3. 상세한 결과 정보 반환
      */
-    public SeatHoldResult holdSeat(BigInteger concertId, BigInteger seatId, BigInteger memberId, String sessionId) {
+    public SeatHoldResult holdSeat(Long concertId, Long seatId, Long memberId, String sessionId) {
         return processSeatOperation(
             concertId, seatId, memberId, sessionId,
             HOLD_OPERATION,
@@ -66,7 +65,7 @@ public class SeatHoldService {
      * 1. Redis 기반 좌석 점유 해제
      * 2. 상세한 결과 정보 반환
      */
-    public SeatHoldResult releaseSeat(BigInteger concertId, BigInteger seatId, BigInteger memberId, String sessionId) {
+    public SeatHoldResult releaseSeat(Long concertId, Long seatId, Long memberId, String sessionId) {
         return processSeatOperation(
             concertId, seatId, memberId, sessionId,
             RELEASE_OPERATION,
@@ -80,7 +79,7 @@ public class SeatHoldService {
     /**
      * 좌석 작업 공통 처리 메서드
      */
-    private SeatHoldResult processSeatOperation(BigInteger concertId, BigInteger seatId, BigInteger memberId,
+    private SeatHoldResult processSeatOperation(Long concertId, Long seatId, Long memberId,
                                                String sessionId, String operationName, SeatOperation operation,
                                                String successMessage, String failureMessage,
                                                String operationType) {
@@ -123,7 +122,7 @@ public class SeatHoldService {
     /**
      * 사용자 상태 조회
      */
-    private UserStatus getUserStatus(BigInteger memberId, BigInteger concertId) {
+    private UserStatus getUserStatus(Long memberId, Long concertId) {
         try {
             String userStatusStr = redisQueueService.getUserStatus(memberId, concertId);
             if (userStatusStr == null) {
@@ -173,7 +172,7 @@ public class SeatHoldService {
     /**
      * 좌석 정보 조회 헬퍼 메서드
      */
-    private SeatStatusDto getSeatInfo(BigInteger concertId, BigInteger seatId) {
+    private SeatStatusDto getSeatInfo(Long concertId, Long seatId) {
         return seatStatusService.getSeatStatusFromRedis(concertId).stream()
             .filter(seat -> seat.getId().equals(seatId))
             .findFirst()
@@ -185,6 +184,6 @@ public class SeatHoldService {
      */
     @FunctionalInterface
     private interface SeatOperation {
-        boolean execute(BigInteger concertId, BigInteger seatId, BigInteger memberId);
+        boolean execute(Long concertId, Long seatId, Long memberId);
     }
 } 

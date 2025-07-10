@@ -1,6 +1,5 @@
 package com.sdemo1.service;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -63,7 +62,7 @@ public class ConcertService {
     /**
      * 콘서트 ID로 조회 (캐시 적용)
      */
-    public ConcertDto getConcertById(BigInteger id) {
+    public ConcertDto getConcertById(Long id) {
         String cacheKey = CacheKeyGenerator.getConcertByIdKey(id);
         
         ConcertDto concert = null;
@@ -145,7 +144,7 @@ public class ConcertService {
     /**
      * 콘서트 수정 (캐시 무효화)
      */
-    public ConcertDto updateConcert(BigInteger id, ConcertDto concertDto) {
+    public ConcertDto updateConcert(Long id, ConcertDto concertDto) {
         log.info("=== 콘서트 수정: {} ===", id);
         
         Concert existingConcert = concertRepository.findById(id)
@@ -168,7 +167,7 @@ public class ConcertService {
     /**
      * 콘서트 삭제 (캐시 무효화)
      */
-    public void deleteConcert(BigInteger id) {
+    public void deleteConcert(Long id) {
         log.info("=== 콘서트 삭제: {} ===", id);
         concertRepository.deleteById(id);
         
@@ -179,7 +178,7 @@ public class ConcertService {
     /**
      * 콘서트 캐시 무효화
      */
-    public void evictConcertCache(BigInteger concertId) {
+    public void evictConcertCache(Long concertId) {
         log.info("=== 콘서트 캐시 무효화: {} ===", concertId);
         cacheInvalidationUtils.invalidateConcertCache(concertId);
     }

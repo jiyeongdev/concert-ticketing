@@ -1,6 +1,5 @@
 package com.sdemo1.service;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,7 +23,7 @@ public class ConcertCacheService {
     /**
      * 콘서트 좌석 정보 조회 (캐시 우선)
      */
-    public List<ConcertSeatInfo> getConcertSeatsFromCache(BigInteger concertId) {
+    public List<ConcertSeatInfo> getConcertSeatsFromCache(Long concertId) {
         String cacheKey = CONCERT_SEATS_CACHE_KEY + concertId;
         
         try {
@@ -48,7 +47,7 @@ public class ConcertCacheService {
     /**
      * 콘서트 좌석 정보를 캐시에 저장
      */
-    public void cacheConcertSeats(BigInteger concertId, List<ConcertSeatInfo> seats) {
+    public void cacheConcertSeats(Long concertId, List<ConcertSeatInfo> seats) {
         String cacheKey = CONCERT_SEATS_CACHE_KEY + concertId;
         
         try {
@@ -65,7 +64,7 @@ public class ConcertCacheService {
     /**
      * 콘서트 관련 캐시 삭제
      */
-    public void evictConcertCache(BigInteger concertId) {
+    public void evictConcertCache(Long concertId) {
         String cacheKey = CONCERT_SEATS_CACHE_KEY + concertId;
         
         try {
@@ -101,9 +100,9 @@ public class ConcertCacheService {
     @lombok.NoArgsConstructor
     @lombok.AllArgsConstructor
     public static class ConcertSeatInfo {
-        private BigInteger id;
-        private BigInteger concertId;
-        private BigInteger seatGradeId;
+        private Long id;
+        private Long concertId;
+        private Long seatGradeId;
         private String seatRow;
         private String seatNumber;
         private Integer positionX;

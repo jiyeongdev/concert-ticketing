@@ -1,6 +1,5 @@
 package com.sdemo1.service;
 
-import java.math.BigInteger;
 import com.sdemo1.entity.Seat;
 import com.sdemo1.entity.SeatGrade;
 import com.sdemo1.repository.SeatGradeRepository;
@@ -23,8 +22,8 @@ public class PaymentValidationService {
     /**
      * 결제 요청 검증
      */
-    public ValidationResult validatePaymentRequest(BigInteger memberId, BigInteger concertId, 
-                                                BigInteger seatId, Integer amount, String paymentMethod) {
+    public ValidationResult validatePaymentRequest(Long memberId, Long concertId, 
+                                                Long seatId, Integer amount, String paymentMethod) {
         try {
             // 1. 좌석 존재 여부 확인
             Seat seat = seatRepository.findById(seatId)

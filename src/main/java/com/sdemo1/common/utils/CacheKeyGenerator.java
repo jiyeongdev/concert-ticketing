@@ -1,7 +1,5 @@
 package com.sdemo1.common.utils;
 
-import java.math.BigInteger;
-
 /**
  * 캐시 키 생성을 중앙화하는 유틸리티 클래스
  * 
@@ -26,35 +24,35 @@ public class CacheKeyGenerator {
     /**
      * 콘서트의 모든 좌석 조회 캐시 키
      */
-    public static String getSeatsByConcertKey(BigInteger concertId) {
+    public static String getSeatsByConcertKey(Long concertId) {
         return SEAT_CACHE_PREFIX + "concert:" + concertId;
     }
 
     /**
      * 특정 좌석 조회 캐시 키
      */
-    public static String getSeatByIdKey(BigInteger seatId) {
+    public static String getSeatByIdKey(Long seatId) {
         return SEAT_CACHE_PREFIX + "seat:" + seatId;
     }
 
     /**
      * 콘서트 + 좌석등급별 좌석 조회 캐시 키
      */
-    public static String getSeatsByConcertAndGradeKey(BigInteger concertId, BigInteger seatGradeId) {
+    public static String getSeatsByConcertAndGradeKey(Long concertId, Long seatGradeId) {
         return SEAT_CACHE_PREFIX + "concert:" + concertId + ":grade:" + seatGradeId;
     }
 
     /**
      * 콘서트 + 좌석 상태별 좌석 조회 캐시 키
      */
-    public static String getSeatsByConcertAndStatusKey(BigInteger concertId, String status) {
+    public static String getSeatsByConcertAndStatusKey(Long concertId, String status) {
         return SEAT_CACHE_PREFIX + "concert:" + concertId + ":status:" + status;
     }
 
     /**
      * 콘서트 관련 모든 좌석 캐시 키 패턴 (무효화용)
      */
-    public static String getSeatsByConcertPattern(BigInteger concertId) {
+    public static String getSeatsByConcertPattern(Long concertId) {
         return SEAT_CACHE_PREFIX + "concert:" + concertId + "*";
     }
 
@@ -70,7 +68,7 @@ public class CacheKeyGenerator {
     /**
      * 특정 콘서트 조회 캐시 키
      */
-    public static String getConcertByIdKey(BigInteger concertId) {
+    public static String getConcertByIdKey(Long concertId) {
         return CONCERT_CACHE_PREFIX + "concert:" + concertId;
     }
 
@@ -93,21 +91,21 @@ public class CacheKeyGenerator {
     /**
      * 콘서트의 모든 좌석등급 조회 캐시 키
      */
-    public static String getSeatGradesByConcertKey(BigInteger concertId) {
+    public static String getSeatGradesByConcertKey(Long concertId) {
         return SEAT_GRADE_CACHE_PREFIX + "concert:" + concertId;
     }
 
     /**
      * 특정 좌석등급 조회 캐시 키
      */
-    public static String getSeatGradeByIdKey(BigInteger seatGradeId) {
+    public static String getSeatGradeByIdKey(Long seatGradeId) {
         return SEAT_GRADE_CACHE_PREFIX + "grade:" + seatGradeId;
     }
 
     /**
      * 콘서트 관련 모든 좌석등급 캐시 키 패턴 (무효화용)
      */
-    public static String getSeatGradesByConcertPattern(BigInteger concertId) {
+    public static String getSeatGradesByConcertPattern(Long concertId) {
         return SEAT_GRADE_CACHE_PREFIX + "concert:" + concertId + "*";
     }
 
