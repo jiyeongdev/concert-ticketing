@@ -62,6 +62,30 @@ public class SwaggerConfig {
                         | **대기열 시스템** | RabbitMQ + Redis | 실시간 대기열 관리, 순서 보장 |
                         | **회원 관리** | Spring Security + JWT | 회원가입, 로그인, 프로필 관리 |
                         | **실시간 통신** | WebSocket(STOMP) | 좌석 상태 브로드캐스트, 대기열 모니터링 |
+
+                        ### 🛡️ JWT Token 예시
+
+                        | 권한  | 계정명   | AccessToken (만료 14일후) |
+                        |-------|---------|------------------|
+                        | ADMIN | admin3  | <br/>`eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyMyIsIm1lbWJlcklkIjoyMywibmFtZSI6IkFkbWluIDMiLCJyb2xlIjoiQURNSU4iLCJwaG9uZSI6IjAxMC0yMDAzLTAwMDMiLCJpYXQiOjE3NTIxMDg3NTgsImV4cCI6MTc1MzMxODM1OH0.VI8Mdzw1JUDfXDt51L1i6aX4qFvM_BnpH4UvTuhScAdTFyhX_9R3-WWItaBXtckH720cN9EhoGEh4pQIkk_9cg`<br/> |
+                        | USER  | user3   | <br/>`eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzIiwibWVtYmVySWQiOjMsIm5hbWUiOiJVc2VyIDMiLCJyb2xlIjoiVVNFUiIsInBob25lIjoiMDEwLTEwMDMtMDAwMyIsImlhdCI6MTc1MjEwODg1NywiZXhwIjoxNzUzMzE4NDU3fQ.lAsK4A_CIxpGeOnKhNUq2_L-t0oCp5ovzZoYbB8q4ynw3XjEuMoH_f9poidV__fCa35AnVMoeUnj1ycTz8ioow`<br/> |
+
+                        - 위 토큰을 복사해서 Authorize 버튼에 붙여넣으면, 각 권한별 API 테스트가 가능합니다.
+                        - Bearer 접두사는 자동으로 붙으니, 토큰 값만 입력하세요.
+
+                        ### 🔄 좌석 점유/점유 해제 테스트 방법
+
+                        - 좌석 점유/점유 해제 테스트는 브라우저 두 개를 띄우고, 아래 주소로 접속하세요:
+                          ```
+                          http://localhost:8080/websocket-reservation.html
+                          ```
+                        - 위 토큰의 memberId, seatId, concertId를 입력하고 점유/해제 버튼을 클릭하면 됩니다.
+
+                        | 계정명 |  콘서트Id | 사용자(멤버)Id | 좌석 ID  |
+                        |--------|-----------|----------|--------|
+                        | admin3 | 2         | 23       | 33     |
+                        | user3  | 2         | 3        | 33     |
+
                         """)
                 .version("1.0.0")
                 .contact(new Contact()
