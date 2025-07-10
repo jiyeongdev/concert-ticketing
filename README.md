@@ -11,7 +11,7 @@
 - **결제 시스템**: 안전한 결제 처리 및 검증
 - **실시간 모니터링**: WebSocket을 통한 실시간 알림
 
-## 🏗️ 기술 스택
+##  기술 스택
 
 ### Backend
 - **Spring Boot 3.2.3** (Java 21)
@@ -94,7 +94,7 @@ docker-compose down
 
 - **WebSocket Reservation Test Page**: [websocket-reservation.html](src/main/resources/static/websocket-reservation.html) - 웹소켓을 통해 실시간 좌석 예약 기능을 테스트할 수 있는 HTML 페이지입니다. 상단의 input
 
-## 📖 API 문서
+##  API 문서
 
 ### Swagger UI 사용법
 
@@ -103,11 +103,30 @@ docker-compose down
 3. 각 API를 클릭하여 상세 정보 확인
 4. **"Try it out"** 버튼으로 직접 API 테스트 가능
 
-## 🛠️ 개발 및 관리
+## 실행 방법
+
+### 1. 로컬 개발 환경 실행
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+- application-local.yml의 설정이 적용됩니다.
+- DB/Redis/RabbitMQ는 로컬에서 직접 실행되어야 합니다.
+
+### 2. 도커 환경(배포/개발) 실행
+
+```bash
+./start.sh
+```
+- docker-compose로 모든 서비스가 실행됩니다.
+- Spring Boot는 application-dev.yml 설정이 자동 적용됩니다.
+
+
+##  개발 및 관리
 
 ### Docker 이미지 빌드 및 컨테이너 관리
 
-#### 🏗️ Docker 이미지 빌드
+####  Docker 이미지 빌드
 
 ```bash
 # 1. Spring Boot 애플리케이션 이미지 빌드
@@ -123,7 +142,7 @@ docker-compose build
 docker build -t concert-reservation-app .
 ```
 
-#### 📦 생성되는 컨테이너 정보
+####  생성되는 컨테이너 정보
 
 Docker Compose 실행 시 다음 컨테이너들이 생성됩니다:
 
@@ -148,6 +167,7 @@ docker-compose logs -f app
 # 최근 100줄만 확인
 docker-compose logs --tail=100 app
 ```
+
 
 ## 📞 문의
 

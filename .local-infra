@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# 기존 컨테이너 중지 및 삭제
+
+docker rm -f local-mysql 2>/dev/null || true
+docker rm -f redis-local 2>/dev/null || true
+docker rm -f rabbitmq-concert 2>/dev/null || true
+
+# MySQL (포트 3307)
+# prev
+# docker run --name local-mysql \
+# -e MYSQL_ROOT_PASSWORD=admin1234 \
+# -e MYSQL_DATABASE=mydb \
+# -p 3307:3306 \
+# -v ~/mysql_data:/var/lib/mysql \
+# -d mysql:8.0
+
+# now
+docker run -d --name local-mysql \
+  -e MYSQL_ROOT_PASSWORD=admin1234 \
+  -e MYSQL_DATABASE=mydb \
+  -e MYSQL_ROOT_HOST='%' \
+  -p 3307:3306 \
+  mysql:8.0 \
+  --default-authentication-plugin=mysql_native_password \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_unicode_ci
+
+# MySQL이 완전히 뜰 때까지 대기
+until mysqladmin ping -h 127.0.0.1 -P 3307 -u root -padmin1234 --silent; do
+  echo "MySQL이 준비될 때까지 대기 중..."
+  sleep 2
+done
+
+
+# Redis (포트 6380)
+docker run -d --name redis-local -p 6380:6379 redis:7-alpine
+
+# RabbitMQ (포트 5673, 관리포트 15673)
+docker run --name rabbitmq-concert -p 5673:5672 -p 15673:15672 -d rabbitmq:3-management
+
+echo "로컬 인프라(MySQL:3307, Redis:6380, RabbitMQ:5673/15673) 컨테이너가 실행되었습니다." 
+
+# 8081 포트가 사용 중이 아니면 Spring Boot 실행
+if ! lsof -i :8081 | grep LISTEN > /dev/null; then
+  echo "8081 포트가 비어있으므로 Spring Boot를 실행합니다."
+  ./gradlew bootRun --args='--spring.profiles.active=local'
+else
+  echo "8081 포트가 이미 사용 중입니다. Spring Boot는 실행하지 않습니다."
+fi 

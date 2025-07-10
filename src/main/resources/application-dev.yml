@@ -1,0 +1,16 @@
+spring:
+  data:
+    redis:
+      host: redis
+  rabbitmq:
+    host: rabbitmq
+  datasource:
+    url: jdbc:mysql://mysql:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+logging:
+  level:
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+---
+# profile 적용 로그
+logging.level.com.sdemo1: DEBUG 

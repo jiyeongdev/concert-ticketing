@@ -23,7 +23,7 @@ spring:
     connection-timeout: 10000 # 10초로 늘리기
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -78,15 +78,15 @@ spring:
 # JWT 설정
 jwt:
   secret: ${JWT_SECRET}
-  access-token-validity-in-seconds: 86400 #300 #5분  #86400 # 24시간
-  refresh-token-validity-in-seconds: 1209600  # 14일
+  access-token-validity-in-seconds: 1209600 #테스트를 위해 14일로 설정 #300 5분 
+  refresh-token-validity-in-seconds: 2592000  # 30일
   cookie:
     refresh-token:
       name: refreshToken
       http-only: true
       secure: true
       path: /
-      max-age: 1209600  # 14일
+      max-age: 2592000 # 1209600  # 14일
       same-site: None
       domain: localhost
 

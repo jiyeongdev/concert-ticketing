@@ -1,0 +1,21 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6380
+  rabbitmq:
+    host: localhost
+    port: 5673
+  datasource:
+    url: jdbc:mysql://localhost:3307/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+server:
+  port: 8081
+
+logging:
+  level:
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# profile 적용 로그
+logging.level.com.sdemo1: DEBUG 
