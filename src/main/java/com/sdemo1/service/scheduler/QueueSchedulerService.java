@@ -31,6 +31,8 @@ public class QueueSchedulerService {
     public void openQueuesAutomatically() {
         LocalDateTime now = LocalDateTime.now();
         List<Concert> openTargets = concertRepository.findByOpenTimeLessThanEqualAndCloseTimeAfter(now, now);
+        log.info("스케쥴러 : 현재 시간: {}", now);
+        log.info("스케쥴러 : 오픈 대상 콘서트 수: {}", openTargets.size());
         for (Concert concert : openTargets) {
             try {
                 log.info("[스케줄러] 콘서트 {} 큐 오픈 자동 처리", concert.getId());

@@ -89,7 +89,7 @@ public class RedisSeatHoldService {
         messageListenerContainer.addMessageListener(listener, 
             org.springframework.data.redis.listener.PatternTopic.of("__keyevent@*__:expired"));
         
-        log.info("Redis Key Events 리스너 초기화 완료");
+        log.info("Redis Key Events 리스너 초기화 완료!!");
     }
     
     /**

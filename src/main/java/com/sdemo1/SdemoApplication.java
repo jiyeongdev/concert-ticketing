@@ -7,12 +7,14 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import lombok.RequiredArgsConstructor;
 
 @SpringBootApplication
 @EntityScan(basePackages = "com.sdemo1.entity")
 @EnableJpaRepositories(basePackages = "com.sdemo1.repository")
 @RequiredArgsConstructor
+@EnableScheduling
 public class SdemoApplication {
 
     private final RedisSeatHoldService redisSeatHoldService;

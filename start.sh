@@ -54,6 +54,7 @@ check_and_init_db() {
 
 start_app() {
   echo "🚀 Spring Boot 애플리케이션 컨테이너를 시작합니다..."
+  docker-compose build app  
   docker-compose up -d app
 }
 
